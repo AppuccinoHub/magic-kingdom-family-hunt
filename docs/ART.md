@@ -1,6 +1,6 @@
 # Artwork
 
-Pictures are original SVG drawings in `components/art.tsx` and `components/avatar-mark.tsx`. They are storybook travel-poster illustrations: night purple, gold, layered color, and park-adventure objects. They are not emoji and they are not preschool clip art.
+Pictures are original SVG drawings in `components/art.tsx` and `components/avatar-mark.tsx`. The welcome picture is a bright daytime path with a horse and an elephant. The finished-card picture is a night sky with fireworks. They are not emoji and they are not copied characters.
 
 They were drawn for this project. They are not traced from a film, a logo, or a ride.
 

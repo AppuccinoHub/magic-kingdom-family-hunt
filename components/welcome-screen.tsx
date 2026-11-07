@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AdventureParade } from "@/components/art";
+import { DayExplore, NightFireworks } from "@/components/art";
 import { AdvisorLine, DeviceNotice, ParkNotice, UnofficialNotice } from "@/components/notices";
 import { PersonFields } from "@/components/person-fields";
 import { Frame } from "@/components/frame";
@@ -25,6 +25,7 @@ export function WelcomeScreen() {
   const [ready, setReady] = useState<HuntState | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [scene, setScene] = useState<"day" | "night">("day");
 
   useEffect(() => {
     listPhoneHunts()
@@ -50,18 +51,38 @@ export function WelcomeScreen() {
 
   return (
     <Frame>
-      <div className="overflow-hidden rounded-[2rem] bg-night">
-        <AdventureParade className="h-auto w-full" />
+      <div className={`overflow-hidden rounded-[2rem] ${scene === "day" ? "bg-[#e7f6ff]" : "bg-night"}`}>
+        {scene === "day" ? <DayExplore className="h-auto w-full" /> : <NightFireworks className="h-auto w-full" />}
         <div className="px-4 pb-5">
-          <h1 className="font-display text-5xl leading-none text-white">Our family adventure</h1>
-          <p className="mt-2 text-2xl font-bold leading-snug text-[#ffe08a]">Magic Kingdom family bingo</p>
+          <h1 className={`font-display text-5xl leading-none ${scene === "day" ? "text-ink" : "text-white"}`}>Our family adventure</h1>
+          <p className={`mt-2 text-2xl font-bold leading-snug ${scene === "day" ? "text-[#8C6418]" : "text-[#ffe08a]"}`}>Magic Kingdom family bingo</p>
         </div>
       </div>
-      <p className="mt-4 text-2xl leading-snug">Play together on one phone. Big letters. No timer. No sign-up.</p>
-      <p className="mt-2 text-lg">For ages 7 to 87. Pinch to zoom, or use Text size at the top.</p>
-
+      <div className="mt-3 flex gap-2" role="group" aria-label="Picture">
+        <button
+          type="button"
+          className={`min-h-11 flex-1 rounded-full border-2 border-ink px-3 text-base font-bold ${scene === "day" ? "bg-butter" : "bg-paper"}`}
+          aria-pressed={scene === "day"}
+          onClick={() => setScene("day")}
+        >
+          Day scene
+        </button>
+        <button
+          type="button"
+          className={`min-h-11 flex-1 rounded-full border-2 border-ink px-3 text-base font-bold ${scene === "night" ? "bg-butter" : "bg-paper"}`}
+          aria-pressed={scene === "night"}
+          onClick={() => setScene("night")}
+        >
+          Night fireworks
+        </button>
+      </div>
       {mode === "home" ? (
-        <div className="mt-5 grid gap-4">
+        <div className="mt-4 grid gap-4">
+          <Button size="tall" onClick={() => setMode("create")}>
+            Start your hunt
+          </Button>
+          <p className="text-2xl leading-snug">Play together on one phone. Big letters. No timer. No sign-up.</p>
+          <p className="text-lg">For ages 7 to 87. Open Settings for larger letters or less motion.</p>
           <DeviceNotice />
           <section className="grid gap-3" aria-labelledby="how-heading">
             <h2 id="how-heading" className="text-2xl font-bold">
@@ -91,9 +112,6 @@ export function WelcomeScreen() {
               Open {hunt.hunt.familyName}
             </Button>
           ))}
-          <Button size="tall" onClick={() => setMode("create")}>
-            Start a new family hunt
-          </Button>
           <ParkNotice />
           <UnofficialNotice />
           <AdvisorLine name="" />

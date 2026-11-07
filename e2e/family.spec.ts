@@ -16,7 +16,7 @@ async function overflow(page: Page) {
 
 async function startHunt(page: Page, familyName: string) {
   await page.goto("/");
-  await page.getByRole("button", { name: "Start a new family hunt" }).click();
+  await page.getByRole("button", { name: "Start your hunt" }).click();
   await page.locator("#family-name").fill(familyName);
   await page.getByRole("button", { name: "Create our hunt" }).click();
   await page.getByRole("link", { name: "Open the bingo card" }).click();
@@ -65,6 +65,12 @@ test("one phone keeps the hunt, photos, and a single celebration", async ({ page
   await expect(page.getByRole("heading", { name: "Our family adventure" })).toBeVisible();
   await expect(page.getByTestId("device-notice")).toContainText("stay in this browser on this device");
   await expect(page.getByTestId("device-notice")).toContainText("Another phone does not share");
+  await expect(page.getByRole("button", { name: "Smaller text" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Start your hunt" })).toBeVisible();
+  await page.screenshot({ path: "/opt/cursor/artifacts/welcome-day-mobile.png" });
+  await page.getByRole("button", { name: "Night fireworks" }).click();
+  await page.screenshot({ path: "/opt/cursor/artifacts/welcome-night-mobile.png" });
+  await page.getByRole("button", { name: "Day scene" }).click();
   await expect(page.getByText("👑")).toHaveCount(0);
   await expect(page.getByText("⭐")).toHaveCount(0);
   await page.screenshot({ path: "/opt/cursor/artifacts/welcome-mobile.png" });

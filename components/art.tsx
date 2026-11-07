@@ -9,61 +9,69 @@ const slate = "#8E9AAB";
 const teal = "#7DCFC3";
 const night = "#1A0C40";
 
-/** Evening travel poster. Original motifs, not a park logo or a character. */
-export function AdventureParade({ className }: { className?: string }) {
+/** Bright daytime travel poster. Original scene, not a park logo or a character. */
+export function DayExplore({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 360 230" className={className} role="img" aria-label="An evening travel poster with fireworks, a lantern, a carousel horse, an elephant, a mine cart, and a frozen treat">
-      <rect width="360" height="230" fill={night} />
-      <ellipse cx="180" cy="-10" rx="240" ry="130" fill="#3A1C78" />
-      <ellipse cx="292" cy="42" rx="46" ry="46" fill="#F3D48A" opacity="0.18" />
-      <circle cx="300" cy="48" r="16" fill="#F6E2A8" />
-      <circle cx="292" cy="42" r="13" fill="#3A1C78" />
-      <Burst x={48} y={40} color={coral} />
-      <Burst x={138} y={28} color={gold} />
-      <Burst x={214} y={46} color={teal} />
-      <Star x={96} y={22} r={5} />
-      <Star x={176} y={18} r={3} />
-      <Star x={248} y={20} r={4} />
-      <path d="M0 168c40-28 90-18 140-4 54 16 100 8 150-16 24-8 48-6 70 4v78H0z" fill="#241252" />
-      <Skyline />
-      <path d="M0 188c50-16 110-6 170 6 48 10 90 4 140-10 18-4 34-2 50 4v42H0z" fill="#12082C" />
-      <g transform="translate(18,78) scale(0.72)">
-        <Lantern x={0} y={0} />
+    <svg viewBox="0 0 360 220" className={className} role="img" aria-label="A bright daytime travel poster of a path, trees, a horse, and an elephant">
+      <rect width="360" height="220" fill="#8ED4F2" />
+      <ellipse cx="70" cy="36" rx="46" ry="16" fill="#fff" opacity="0.85" />
+      <ellipse cx="96" cy="40" rx="28" ry="12" fill="#fff" />
+      <ellipse cx="250" cy="28" rx="40" ry="14" fill="#fff" opacity="0.8" />
+      <circle cx="300" cy="42" r="16" fill="#F6C445" />
+      <circle cx="294" cy="38" r="6" fill="#FFE9A8" />
+      <path d="M0 150c40-28 80-20 120-8 36 10 70 8 110-12 30-16 70-10 130 8v82H0z" fill="#7EBF6A" />
+      <path d="M0 168c60-18 100-8 160 4 50 10 90 2 200-16v64H0z" fill="#3E8F55" />
+      <path d="M150 220c-10-40 8-70 28-78 18 10 34 40 24 78z" fill="#D7B072" />
+      <path d="M40 168c8-26 18-26 26 0" fill="#2F6B3A" />
+      <circle cx="46" cy="132" r="16" fill="#1F8A4C" />
+      <circle cx="62" cy="126" r="14" fill="#34A35A" />
+      <path d="M250 172c8-30 18-30 26 0" fill="#2F6B3A" />
+      <circle cx="256" cy="132" r="18" fill="#187A45" />
+      <circle cx="274" cy="124" r="14" fill="#2E9B55" />
+      <DayHorse />
+      <DayElephant />
+      <rect x="8" y="8" width="344" height="204" fill="none" stroke="#C4922A" strokeWidth="1.4" />
+    </svg>
+  );
+}
+
+export function AdventureParade({ className }: { className?: string }) {
+  return <DayExplore className={className} />;
+}
+
+export function NightFireworks({ className, motion = false }: { className?: string; motion?: boolean }) {
+  return (
+    <svg viewBox="0 0 360 200" className={className} role="img" aria-label="A night travel poster with fireworks over a quiet town">
+      <rect width="360" height="200" fill="#140A32" />
+      <ellipse cx="180" cy="0" rx="220" ry="90" fill="#3A1C78" />
+      <circle cx="300" cy="36" r="14" fill="#F6E2A8" />
+      <circle cx="292" cy="30" r="12" fill="#3A1C78" />
+      <g className={motion ? "firework-once" : undefined}>
+        <Burst x={70} y={48} color={gold} />
+        <Burst x={150} y={36} color={coral} />
+        <Burst x={230} y={54} color={teal} />
+        <Burst x={48} y={78} color="#F6E2A8" />
       </g>
-      <g transform="translate(78,96) scale(0.78)">
-        <Horse x={0} y={0} />
+      <Star x={24} y={24} r={3} />
+      <Star x={110} y={18} r={2.2} />
+      <Star x={196} y={22} r={2.6} />
+      <Star x={260} y={16} r={2} />
+      <path d="M0 150h360v50H0z" fill="#12082C" />
+      <path d="M16 150v-28h14v-16h10v16h16v28zM90 150v-22h18v-20h12v42zM180 150v-34h22v34zM230 150v-18l16-22 16 22v18zM300 150v-26h14v-14h10v40z" fill="#1A0E3A" />
+      <g fill="#F6E2A8">
+        <rect x="22" y="130" width="3" height="5" />
+        <rect x="34" y="118" width="3" height="5" />
+        <rect x="98" y="136" width="3" height="5" />
+        <rect x="188" y="128" width="3" height="5" />
+        <rect x="308" y="124" width="3" height="5" />
       </g>
-      <g transform="translate(168,92) scale(0.82)">
-        <Elephant x={0} y={0} />
-      </g>
-      <g transform="translate(250,118) scale(0.7)">
-        <Train x={0} y={0} />
-      </g>
-      <g transform="translate(312,132) scale(0.55)">
-        <IceCream x={0} y={0} />
-      </g>
-      <rect x="8" y="8" width="344" height="214" fill="none" stroke={gold} strokeWidth="1.25" opacity="0.7" />
-      <rect x="12" y="12" width="336" height="206" fill="none" stroke={cream} strokeWidth="0.6" opacity="0.35" />
+      <rect x="8" y="8" width="344" height="184" fill="none" stroke={gold} strokeWidth="1.4" />
     </svg>
   );
 }
 
 export function FireworkSky({ className, motion }: { className?: string; motion: boolean }) {
-  return (
-    <svg viewBox="0 0 320 90" className={className} aria-hidden="true">
-      <rect width="320" height="90" rx="18" fill="#140A32" />
-      <ellipse cx="160" cy="0" rx="180" ry="50" fill="#3A1C78" />
-      <g className={motion ? "firework-once" : undefined}>
-        <Burst x={70} y={46} color={gold} />
-        <Burst x={160} y={34} color={coral} />
-        <Burst x={250} y={48} color={teal} />
-      </g>
-      <Star x={28} y={22} r={3} />
-      <Star x={118} y={16} r={2.4} />
-      <Star x={210} y={18} r={3} />
-      <Star x={292} y={24} r={2.2} />
-    </svg>
-  );
+  return <NightFireworks className={className} motion={motion} />;
 }
 
 export function CollectibleStamp({
@@ -169,30 +177,6 @@ function Motif({ name }: { name: string }) {
   }
 }
 
-function Skyline() {
-  return (
-    <g fill="#1A0E3A">
-      <path d="M18 168V118h18v12h10V96h16v28h8v-16h14v42z" />
-      <path d="M96 168v-36h12v-22h8v22h10v36z" />
-      <path d="M150 168V124h22v44z" />
-      <path d="M188 168v-28l14-22 14 22v28z" />
-      <path d="M230 168V110h16v20h12V92h18v76z" />
-      <g fill="#F6E2A8">
-        <rect x="24" y="128" width="4" height="6" />
-        <rect x="32" y="128" width="4" height="6" />
-        <rect x="48" y="108" width="4" height="6" />
-        <rect x="58" y="108" width="4" height="6" />
-        <rect x="102" y="146" width="3" height="5" />
-        <rect x="158" y="136" width="4" height="7" />
-        <rect x="168" y="136" width="4" height="7" />
-        <rect x="240" y="124" width="4" height="6" />
-        <rect x="262" y="108" width="4" height="6" />
-        <rect x="272" y="108" width="4" height="6" />
-      </g>
-    </g>
-  );
-}
-
 function Burst({ x, y, color }: { x: number; y: number; color: string }) {
   const rays = Array.from({ length: 16 }, (_, index) => {
     const angle = (index / 16) * Math.PI * 2;
@@ -234,41 +218,65 @@ function Lantern({ x, y }: { x: number; y: number }) {
   );
 }
 
-function Horse({ x, y }: { x: number; y: number }) {
+function DayHorse() {
   return (
     <g>
-      <path d={`M${x + 62} ${y - 6} v70`} stroke={gold} strokeWidth="4" />
-      <path d={`M${x + 58} ${y - 6} v70`} stroke="#F6E2A8" strokeWidth="1" />
-      <path d={`M${x + 8} ${y + 36} c10-16 28-18 46-6 6 4 10 4 16 0`} fill="none" stroke={cream} strokeWidth="1" />
-      <path d={`M${x + 14} ${y + 40} c8-10 24-14 40-4 4 12-6 20-18 20-8 0-16-2-22-8-4 6-12 8-16 4-6-4-2-10 4-12z`} fill={cream} />
-      <path d={`M${x + 18} ${y + 48} c6 6 20 6 28-2`} fill="none" stroke="#E7D3B0" strokeWidth="2" />
-      <path d={`M${x + 46} ${y + 28} c8-6 16-18 14-28-8 2-12 8-14 14-4-8-2-16 4-20-10 2-16 12-12 22-6 2-10 8-8 12z`} fill={cream} />
-      <path d={`M${x + 52} ${y + 8} c6-8 14-8 16-2`} fill="none" stroke={coral} strokeWidth="2" />
-      <path d={`M${x + 44} ${y + 4} c-2-8 4-12 8-10 2 6-2 10-6 12`} fill={coral} />
-      <path d={`M${x + 58} ${y + 14} c6 2 8 6 4 8`} fill="none" stroke={deep} strokeWidth="1.2" />
-      <ellipse cx={x + 60} cy={y + 16} rx="1.3" ry="1" fill={night} />
-      <path d={`M${x + 22} ${y + 36} h18 v7 H${x + 22}z`} fill={coral} />
-      <path d={`M${x + 24} ${y + 38} h14`} stroke={gold} strokeWidth="1" />
-      <path d={`M${x + 16} ${y + 54} c2 10 2 14 0 18 M${x + 30} ${y + 56} c1 8 1 12-1 16 M${x + 42} ${y + 52} c4 8 2 14-2 18`} stroke={cream} strokeWidth="2.2" fill="none" />
-      <path d={`M${x + 8} ${y + 34} c-6 2-8 8-4 10 4-2 6-6 4-10z`} fill={cream} />
+      <path d="M78 168v28M96 170v26M118 168v28M136 166v26" stroke="#C4A574" strokeWidth="5" strokeLinecap="round" />
+      <ellipse cx="112" cy="156" rx="42" ry="20" fill="#F4E4C4" />
+      <path d="M142 148c16-18 28-34 26-48" stroke="#F4E4C4" strokeWidth="16" fill="none" strokeLinecap="round" />
+      <ellipse cx="176" cy="96" rx="18" ry="11" fill="#F4E4C4" />
+      <path d="M166 90l6-16 10 12z" fill="#8C3A2A" />
+      <path d="M150 112c6 8 8 16 4 24" fill="none" stroke="#8C3A2A" strokeWidth="3" />
+      <path d="M186 100c8 2 12 6 10 10" fill="none" stroke="#6B5344" strokeWidth="1.6" />
+      <ellipse cx="178" cy="98" rx="1.6" ry="1.2" fill="#14233C" />
+      <path d="M78 150c-12 6-14 16-4 18" fill="#F4E4C4" />
+      <path d="M98 146h22v8H98z" fill="#C44536" />
+    </g>
+  );
+}
+
+function DayElephant() {
+  return (
+    <g>
+      <path d="M214 186v22M232 188v20M268 186v22M286 184v20" stroke="#8FA0AE" strokeWidth="6" strokeLinecap="round" />
+      <ellipse cx="248" cy="168" rx="48" ry="26" fill="#C5D0D8" />
+      <ellipse cx="210" cy="156" rx="18" ry="24" fill="#E7B7C6" />
+      <ellipse cx="292" cy="150" rx="20" ry="16" fill="#D5DEE6" />
+      <path d="M306 156c16 8 18 28 8 40" fill="none" stroke="#8FA0AE" strokeWidth="7" strokeLinecap="round" />
+      <path d="M300 172h8M298 182h8M300 192h6" stroke="#6E7C88" strokeWidth="1.4" />
+      <path d="M304 158c6 1 8 2 10 0" fill="none" stroke="#C4922A" strokeWidth="1.6" />
+      <ellipse cx="298" cy="146" rx="1.8" ry="1.3" fill="#14233C" />
+      <path d="M230 160c10 8 28 8 38 0" fill="none" stroke="#8FA0AE" strokeWidth="3" />
+    </g>
+  );
+}
+
+function Horse({ x, y }: { x: number; y: number }) {
+  return (
+    <g transform={`translate(${x}, ${y}) scale(0.82)`}>
+      <path d="M10 46c4-8 16-12 28-6 8 4 14 2 20-4 4-4 12-4 14 2 2 4-2 8-6 10 4 2 6 8 2 12-6 2-8 8-4 12 2 6-4 10-10 8-4 6-12 6-16 2-4 4-12 4-16 0-6 4-14 0-12-8 2-4 0-10 4-12-4-2-8-8-6-14 2-2 6-4 8-2z" fill={cream} />
+      <path d="M48 18c4-8 12-10 12-2 0 6-6 8-8 12 4 0 8 4 6 8-6 0-10-4-10-8z" fill={cream} />
+      <path d="M54 10c2-6 6-6 7-1" fill="#8C3A2A" />
+      <path d="M46 16c4-4 7-2 5 2" fill="none" stroke="#8C3A2A" strokeWidth="1.6" />
+      <ellipse cx="60" cy="22" rx="1.2" ry="0.9" fill={night} />
+      <path d="M16 48h12v5H16z" fill={coral} />
+      <path d="M14 52c1 8 0 12-2 14M26 54c1 6 0 10-1 12M38 52c2 6 1 10-1 12" stroke={cream} strokeWidth="2.4" fill="none" />
+      <path d="M70 4v58" stroke={gold} strokeWidth="2.4" />
     </g>
   );
 }
 
 function Elephant({ x, y }: { x: number; y: number }) {
   return (
-    <g>
-      <ellipse cx={x + 36} cy={y + 62} rx="28" ry="7" fill="#C9D4DE" opacity="0.35" />
-      <path d={`M${x + 16} ${y + 40} c0-16 12-26 28-26 8 0 16 4 20 10 8-2 16 4 16 12 6 2 10 8 6 14-2 2-6 2-8 2v8h-8v-6H${x + 24}v6h-8v-8c-6 1-12-4-12-12z`} fill={mist} />
-      <path d={`M${x + 22} ${y + 44} c6 8 28 10 40 2 v8 H${x + 22}z`} fill={slate} opacity="0.45" />
-      <path d={`M${x + 18} ${y + 28} c-8 4-12 14-8 22 6 2 14-2 16-8 1-8-2-14-8-14z`} fill="#E7C2CE" />
-      <path d={`M${x + 16} ${y + 34} c2 6 6 8 8 6`} fill="none" stroke="#C4899A" strokeWidth="1" />
-      <path d={`M${x + 58} ${y + 24} c8 0 16 8 16 16 0 4-2 8-6 10 4 8 0 14-6 12-2-6-2-10 0-14-6 2-12 0-14-6 0-8 4-18 10-18z`} fill={mist} />
-      <path d={`M${x + 70} ${y + 40} c6 6 8 14 4 20-2 2-2 4 0 6`} fill="none" stroke={slate} strokeWidth="2.4" strokeLinecap="round" />
-      <path d={`M${x + 68} ${y + 48} h6 M${x + 67} ${y + 52} h6`} stroke={slate} strokeWidth="1" />
-      <ellipse cx={x + 68} cy={y + 32} rx="1.5" ry="1.1" fill={night} />
-      <path d={`M${x + 22} ${y + 52} v10 M${x + 34} ${y + 54} v8 M${x + 48} ${y + 52} v10`} stroke={mist} strokeWidth="3" />
-      <path d={`M${x + 30} ${y + 24} h14`} stroke={teal} strokeWidth="2" />
+    <g transform={`translate(${x}, ${y}) scale(0.9)`}>
+      <path d="M14 36c0-12 12-20 26-18 6 1 12 5 14 10 6 0 12 5 10 11 3 2 4 6 1 9v6H16v-5c-6 0-8-5-4-13z" fill={mist} />
+      <path d="M16 42c6 6 22 6 28 0v6H16z" fill={slate} />
+      <path d="M12 28c-8 2-10 12-4 18 6 1 10-4 10-9 0-6-2-9-6-9z" fill="#E7B7C6" />
+      <path d="M48 24c8 0 14 7 12 13-1 3-3 6-6 7 4 6 1 10-4 8-2-4-1-8 0-10-4 2-8-1-8-6 0-6 3-12 6-12z" fill={mist} />
+      <path d="M58 38c6 3 7 10 4 16" fill="none" stroke="#6E7C88" strokeWidth="2.4" strokeLinecap="round" />
+      <path d="M56 44h4M55 48h4" stroke="#6E7C88" strokeWidth="1" />
+      <ellipse cx="56" cy="30" rx="1.3" ry="1" fill={night} />
+      <path d="M20 54v8M30 55v7M42 54v8" stroke="#A9B7C2" strokeWidth="3" />
     </g>
   );
 }
