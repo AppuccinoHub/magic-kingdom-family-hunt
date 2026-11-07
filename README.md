@@ -1,55 +1,39 @@
 # Magic Kingdom family bingo
 
-A phone-first family bingo card and adventure passport for a Magic Kingdom visit. One link can start a new private hunt for each family. Big type. No timer. No sign-up.
+A phone-first family bingo card and adventure passport for a Magic Kingdom visit. One phone is passed around the family. Big type. No timer. No sign-up. No account.
 
 This is an independent fan activity. It is not an official Disney app and it is not affiliated with The Walt Disney Company or Walt Disney World.
 
-## Run it
-
-```bash
-npm install
-npm run dev
-```
-
-Open [http://127.0.0.1:47291](http://127.0.0.1:47291).
-
-```bash
-npm test
-npm run test:e2e
-```
-
 ## How a family uses it
 
-1. Start a hunt, or join with a family code.
-2. Read a challenge in big letters. The card wording is unchanged.
-3. Do it together at the park.
-4. Add a stamp. Five in a line is a bingo.
-5. When all 25 are stamped, the family sees “You found everything!” once. They can open the souvenir certificate or play that moment again.
+1. Open the page on one phone.
+2. Start a hunt and pass that phone to whoever is playing.
+3. Read a challenge in big letters. The card wording is unchanged.
+4. Do it together at the park.
+5. Add a stamp. Five in a line is a bingo.
+6. When all 25 are stamped, the family sees “You found everything!” once. They can open the souvenir certificate or play that moment again.
 
 Show times and treats printed on the card can change. Check at the park that day.
 
 ## What is saved
 
-On the shared hunt server:
+Progress, notes, and optional photos stay in this browser on this device. Another phone does not share them. Clearing this browser’s saved data can erase them.
 
-- Family name, optional travel-advisor display name, nicknames, and picture choices
-- Stamps, notes, and optional photos
+Photos are kept in the browser. They are not saved to the camera roll.
 
-Not saved: email, phone number, or a public list of families. The family code is the only key. Anyone with the code can see and edit that hunt, including photos.
+Not saved: email, phone number, or a family code. There is no shared server.
 
-Photos stay on the server and are sent only with that hunt’s cookie.
-
-Choose **Use this phone only** if the server cannot be reached. That copy is stored in this browser. It has no family code and does not sync.
-
-## Hosting
-
-Shared play needs this Node server and a disk folder that stays put.
+## Run it
 
 ```bash
-HUNT_DATA_DIR=/var/lib/family-bingo npm run build
-HUNT_DATA_DIR=/var/lib/family-bingo npm start
+npm install
+npm test
+npm run build
+npx --yes serve out
 ```
 
-Use HTTPS in public so the browser keeps the cookie private. A static host cannot sync two phones. The in-memory guess limit is per server process.
+`npm run build` writes a static site in `out/`. The app does not need a database or an API.
 
-If the code is lost, the hunt cannot be looked up from a list. Open **Family code and settings** while a phone is still in the hunt.
+## Free hosting
+
+GitHub Pages can publish the static `out/` folder. The workflow in `.github/workflows/pages.yml` builds with `GITHUB_PAGES=true`, which serves the site at `/magic-kingdom-family-hunt/`. The repository can stay private only if the GitHub plan allows Pages on a private repository. The published Pages address is still a public link. Do not put family names or photos in the site files. Those stay in the browser.

@@ -1,13 +1,72 @@
-import { expect, test } from "@playwright/test";
+import { writeFileSync } from "node:fs";
+import { expect, test, type Page } from "@playwright/test";
 
-async function overflow(page: import("@playwright/test").Page) {
+const photoPath = "/tmp/mk-family-pixel.png";
+writeFileSync(
+  photoPath,
+  Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+    "base64",
+  ),
+);
+
+async function overflow(page: Page) {
   return page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 }
 
-test("phone screens, shared hunt, and one full-card celebration", async ({ page, browser }) => {
+async function startHunt(page: Page, familyName: string) {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Start a new family hunt" }).click();
+  await page.locator("#family-name").fill(familyName);
+  await page.getByRole("button", { name: "Create our hunt" }).click();
+  await page.getByRole("link", { name: "Open the bingo card" }).click();
+  await expect(page.getByTestId("stamp-count")).toHaveText("0");
+}
+
+async function finishAllButOne(page: Page) {
+  await page.evaluate(async () => {
+    const active = JSON.parse(localStorage.getItem("mk-active") || "null") as { id: string };
+    const database = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open("mk-family-hunt", 1);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const record = await new Promise<{
+      challenges: { done: boolean; stampedByName: string | null; stampedAt: string | null }[];
+      members: { nickname: string }[];
+      rev: number;
+    }>((resolve, reject) => {
+      const request = database.transaction("hunts", "readonly").objectStore("hunts").get(active.id);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const name = record.members[0]?.nickname ?? "Our family";
+    record.challenges.forEach((challenge, index) => {
+      if (index > 23) return;
+      challenge.done = true;
+      challenge.stampedByName = name;
+      challenge.stampedAt = new Date(Date.UTC(2026, 0, 1, 0, 0, index)).toISOString();
+    });
+    record.rev += 1;
+    await new Promise<void>((resolve, reject) => {
+      const tx = database.transaction("hunts", "readwrite");
+      tx.objectStore("hunts").put(record);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  });
+  await page.reload();
+  await expect(page.getByTestId("stamp-count")).toHaveText("24");
+}
+
+test("one phone keeps the hunt, photos, and a single celebration", async ({ page, browser }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Our family adventure" })).toBeVisible();
+  await expect(page.getByTestId("device-notice")).toContainText("stay in this browser on this device");
+  await expect(page.getByTestId("device-notice")).toContainText("Another phone does not share");
+  await expect(page.getByText("👑")).toHaveCount(0);
+  await expect(page.getByText("⭐")).toHaveCount(0);
   await page.screenshot({ path: "/opt/cursor/artifacts/welcome-mobile.png" });
   for (const width of [320, 375, 390]) {
     await page.setViewportSize({ width, height: 844 });
@@ -15,12 +74,7 @@ test("phone screens, shared hunt, and one full-card celebration", async ({ page,
   }
   await page.setViewportSize({ width: 390, height: 844 });
 
-  await page.getByRole("button", { name: "Start a new family hunt" }).click();
-  await page.locator("#family-name").fill("The Patel family");
-  await page.getByRole("button", { name: "Create our hunt" }).click();
-  const code = (await page.getByTestId("family-code").innerText()).trim();
-  await page.getByRole("link", { name: "Open the bingo card" }).click();
-  await expect(page.getByTestId("stamp-count")).toHaveText("0");
+  await startHunt(page, "The Patel family");
   await page.locator("article").getByText("Take a pic with the castle", { exact: true }).scrollIntoViewIfNeeded();
   await page.screenshot({ path: "/opt/cursor/artifacts/board-mobile.png" });
   for (const width of [320, 375, 390]) {
@@ -39,27 +93,35 @@ test("phone screens, shared hunt, and one full-card celebration", async ({ page,
   await expect(page.getByTestId("card-words")).toHaveText("Take a pic with the castle");
   await page.screenshot({ path: "/opt/cursor/artifacts/detail-mobile.png" });
   expect(await overflow(page)).toBeLessThanOrEqual(1);
-  await page.getByRole("button", { name: "Back" }).click();
+  await page.getByRole("button", { name: "We did it. Add our stamp" }).click();
+  await page.getByRole("button", { name: "Keep going" }).click();
+  await page.getByLabel("Note for this challenge").fill("By the roses");
+  await page.getByRole("button", { name: "Save note" }).click();
+  await expect(page.getByText("Note saved in this browser.")).toBeVisible();
+  await page.getByTestId("photo-input").setInputFiles(photoPath);
+  await expect(page.getByText("It is not in your camera roll.")).toBeVisible();
+  await expect(page.getByRole("img", { name: "Photo for challenge 1" })).toBeVisible();
 
-  await page.getByRole("tab", { name: "Passport" }).click();
-  await page.screenshot({ path: "/opt/cursor/artifacts/passport-mobile.png" });
-  expect(await overflow(page)).toBeLessThanOrEqual(1);
+  await page.reload();
+  await expect(page.getByTestId("stamp-count")).toHaveText("1");
+  await page.getByRole("tab", { name: "Big list" }).click();
+  await page.getByRole("button", { name: "Read the steps" }).first().click();
+  await expect(page.getByLabel("Note for this challenge")).toHaveValue("By the roses");
+  await expect(page.getByRole("img", { name: "Photo for challenge 1" })).toBeVisible();
+  await page.screenshot({ path: "/opt/cursor/artifacts/photo-kept-mobile.png" });
 
   const other = await browser.newContext();
   const otherPage = await other.newPage();
-  const outsider = await otherPage.request.get("/api/hunt");
-  expect(outsider.status()).toBe(401);
   await otherPage.goto("/");
-  await otherPage.getByRole("button", { name: "Join with a family code" }).click();
-  await otherPage.locator("#family-code").fill(code);
-  await otherPage.getByRole("button", { name: "Join the hunt" }).click();
-  await expect(otherPage.getByRole("heading", { name: "The Patel family" })).toBeVisible();
+  await expect(otherPage.getByRole("button", { name: "Open The Patel family" })).toHaveCount(0);
+  await expect(otherPage.getByTestId("device-notice")).toBeVisible();
+  await other.close();
 
-  for (let index = 0; index < 25; index += 1) {
-    const saved = await page.request.post("/api/hunt/stamps", { data: { index, done: true } });
-    expect(saved.ok()).toBeTruthy();
-  }
-  await expect(page.getByTestId("found-everything")).toBeVisible({ timeout: 10000 });
+  await page.getByRole("button", { name: "Back" }).click();
+  await finishAllButOne(page);
+  await page.getByRole("tab", { name: "Big list" }).click();
+  await page.getByRole("button", { name: "We did it. Add our stamp" }).click();
+  await expect(page.getByTestId("found-everything")).toBeVisible();
   await expect(page.getByRole("heading", { name: "You found everything!" })).toBeVisible();
   await page.getByRole("heading", { name: "You found everything!" }).scrollIntoViewIfNeeded();
   await page.screenshot({ path: "/opt/cursor/artifacts/found-everything-mobile.png" });
@@ -68,25 +130,18 @@ test("phone screens, shared hunt, and one full-card celebration", async ({ page,
   await page.reload();
   await expect(page.getByTestId("found-everything")).toHaveCount(0);
   await page.getByRole("tab", { name: "Passport" }).click();
+  await page.screenshot({ path: "/opt/cursor/artifacts/passport-mobile.png" });
   await page.getByTestId("replay-celebration").click();
   await expect(page.getByRole("heading", { name: "You found everything!" })).toBeVisible();
-  await otherPage.reload();
-  await expect(otherPage.getByTestId("stamp-count")).toHaveText("25", { timeout: 10000 });
-  await other.close();
 });
 
 test("reduced motion keeps the full-card party still", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
-  await page.getByRole("button", { name: "Start a new family hunt" }).click();
-  await page.locator("#family-name").fill("The Rivera family");
-  await page.getByRole("button", { name: "Create our hunt" }).click();
-  await page.getByRole("link", { name: "Open the bingo card" }).click();
-  await expect(page.getByTestId("stamp-count")).toHaveText("0");
-  for (let index = 0; index < 25; index += 1) {
-    expect((await page.request.post("/api/hunt/stamps", { data: { index, done: true } })).ok()).toBeTruthy();
-  }
-  await expect(page.getByTestId("found-everything")).toBeVisible({ timeout: 10000 });
+  await startHunt(page, "The Rivera family");
+  await finishAllButOne(page);
+  await page.getByRole("tab", { name: "Big list" }).click();
+  await page.getByRole("button", { name: "We did it. Add our stamp" }).click();
+  await expect(page.getByTestId("found-everything")).toBeVisible();
   await expect(page.getByTestId("confetti")).toHaveCount(0);
   await expect(page.getByTestId("static-stars")).toBeVisible();
   await expect(page.locator(".firework-once")).toHaveCount(0);

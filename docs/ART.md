@@ -1,21 +1,22 @@
-# Artwork audit
+# Artwork
 
-All pictures in the app are original SVG drawings in `components/art.tsx`. They were drawn for this project. They are not traced from a mockup, a photo, or a film.
+Pictures are original SVG drawings in `components/art.tsx` and `components/avatar-mark.tsx`. They are storybook travel-poster illustrations: night purple, gold, layered color, and park-adventure objects. They are not emoji and they are not preschool clip art.
+
+They were drawn for this project. They are not traced from a film, a logo, or a ride.
 
 What the drawings are:
 
-- A gray elephant with plain pink inner ears, standing on a cloud. No hat, no feather, no costume, and no red ride.
-- A chunky fairground horse on a pole.
-- A lantern, a small train car, a plain rocket, and an ice cream cone.
-- Geometric fireworks, stars, and round balloons.
-- Round collectible stamps for each challenge. The pictures are generic objects (a camera, a boat, a paw, a bat, a magnifying glass).
+- An evening poster with fireworks, a lantern, a carousel horse, a gray elephant, a mine cart, and a frozen treat.
+- A generic stone castle with two equal towers. It is not a copy of a park castle.
+- Medallion stamps for each challenge: a window lamp, a street horse, paw prints, a baseball, a flag, peanuts, a treat box, antlers, an elephant, a chameleon, a bat, a magnifying glass, a boat, a speaking card, gold dust, a fountain, a parcel, a letter, a framed landscape, a mosaic, a camel, tiles, a cart, a cup, and a rocket badge.
+- Name marks for crown, star, sun, locket, leaf, boat, compass, camera, balloon, moon, flower, and apple.
 
 What is not in the app:
 
 - No Disney, Pixar, or park logos.
-- No copied character art and no photos from the printed card.
-- No outside image files. The app does not load `.png` or `.jpg` art.
-- The approved phone mockup was used only as a color and layout guide. It is not shipped and not drawn into the interface.
+- No copied characters and no copied ride designs.
+- No emoji used as the pictures.
+- The elephant has no hat, no feather, and no ride vehicle.
 - Card words such as “Dumbo” and “Mickey” stay in the challenge text because they are printed on the card. The pictures do not portray those characters.
 
 Fonts:

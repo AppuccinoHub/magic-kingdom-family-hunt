@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { BoardView } from "@/components/board-view";
 import { DetailView } from "@/components/detail-view";
 import { Frame } from "@/components/frame";
@@ -10,10 +10,10 @@ import { ListView } from "@/components/list-view";
 import { AdvisorLine, ParkNotice, UnofficialNotice } from "@/components/notices";
 import { PassportView } from "@/components/passport-view";
 import { Button } from "@/components/ui/button";
+import { AvatarMark } from "@/components/avatar-mark";
 import { FoundEverything } from "@/components/found-everything";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { completionToken, fullCardStorageKey, shouldShowFullCelebration } from "@/lib/celebration";
-import { readJson } from "@/lib/load-hunt";
 import {
   phoneAddMember,
   phoneDelete,
@@ -35,6 +35,7 @@ type View = "board" | "list" | "passport";
 type Celebrate = { stamps: number; lines: number; newLine: boolean; full: boolean };
 
 export function HuntScreen() {
+  const router = useRouter();
   const params = useSearchParams();
   const initialView = params.get("view") === "list" || params.get("view") === "passport" ? (params.get("view") as View) : "board";
   const [state, setState] = useState<HuntState | null>(null);
@@ -46,9 +47,8 @@ export function HuntScreen() {
   const [missing, setMissing] = useState(false);
   const [loadError, setLoadError] = useState("");
   const [error, setError] = useState("");
-  const [offline, setOffline] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [sync, setSync] = useState("Checking the hunt…");
+  const [sync, setSync] = useState("Checking this browser…");
   const [live, setLive] = useState("");
   const [celebrate, setCelebrate] = useState<Celebrate | null>(null);
   const [fullOpen, setFullOpen] = useState(false);
@@ -81,27 +81,18 @@ export function HuntScreen() {
     (async () => {
       try {
         const active = readActive();
-        if (active?.mode === "phone") {
-          const hunt = await phoneGet(active.id);
-          if (cancel) return;
-          if (!hunt) {
-            setMissing(true);
-            return;
-          }
-          applyState(hunt, "load");
-          setSync("Saved on this phone only. Other phones cannot join.");
+        if (!active) {
+          if (!cancel) setMissing(true);
           return;
         }
-        const res = await fetch("/api/hunt", { cache: "no-store" });
+        const hunt = await phoneGet(active.id);
         if (cancel) return;
-        if (res.status === 401) {
+        if (!hunt) {
           setMissing(true);
           return;
         }
-        const hunt = await readJson<HuntState>(res);
-        writeActive({ mode: "server" });
         applyState(hunt, "load");
-        setSync("Saved for the whole family.");
+        setSync("Saved in this browser on this device.");
       } catch (err) {
         if (!cancel) setLoadError(err instanceof Error ? err.message : "The hunt could not open.");
       } finally {
@@ -120,47 +111,7 @@ export function HuntScreen() {
   }, [state?.hunt.id, state?.me.id, state?.members]);
 
   useEffect(() => {
-    if (!state || state.phoneOnly) return;
-    let stop = false;
-    let timer = 0;
-    const pull = async () => {
-      try {
-        const res = await fetch("/api/hunt", { cache: "no-store" });
-        if (!res.ok) throw new Error("offline");
-        const next = await readJson<HuntState>(res);
-        const prev = stateRef.current;
-        if (prev && next.rev !== prev.rev && (next.stampCount !== prev.stampCount || next.bingoLineCount !== prev.bingoLineCount)) {
-          setLive(`Updated from your family. ${next.stampCount} of 25 stamps. ${next.bingoLineCount} bingo lines.`);
-        }
-        applyState(next, "change");
-        setOffline(false);
-        setSync("Saved for the whole family.");
-      } catch {
-        if (!stop) {
-          setOffline(true);
-          setSync("The hunt server is not reachable. You can read this screen. New stamps are not saved until you reconnect.");
-        }
-      }
-    };
-    const loop = () => {
-      if (stop) return;
-      if (document.visibilityState === "visible") void pull();
-      timer = window.setTimeout(loop, 3000);
-    };
-    timer = window.setTimeout(loop, 3000);
-    const onVis = () => {
-      if (document.visibilityState === "visible") void pull();
-    };
-    document.addEventListener("visibilitychange", onVis);
-    return () => {
-      stop = true;
-      window.clearTimeout(timer);
-      document.removeEventListener("visibilitychange", onVis);
-    };
-  }, [state?.phoneOnly, state?.hunt.id]);
-
-  useEffect(() => {
-    if (!state?.phoneOnly) return;
+    if (!state) return;
     let cancel = false;
     const created: string[] = [];
     (async () => {
@@ -180,7 +131,7 @@ export function HuntScreen() {
       cancel = true;
       created.forEach((url) => URL.revokeObjectURL(url));
     };
-  }, [state?.phoneOnly, state?.hunt.id, state?.rev, state?.challenges]);
+  }, [state?.hunt.id, state?.rev, state?.challenges]);
 
   function chooseWho(id: string) {
     setWho(id);
@@ -189,25 +140,16 @@ export function HuntScreen() {
 
   function photoSrc(index: number) {
     if (!state?.challenges[index]?.hasPhoto) return undefined;
-    if (state.phoneOnly) return photoUrls[index];
-    return `/api/hunt/photos/${index}?v=${state.rev}`;
+    return photoUrls[index];
   }
 
   async function stamp(index: number, done: boolean) {
-    if (!state || offline) return;
+    if (!state) return;
     setBusy(true);
     setError("");
     const beforeLines = state.bingoLineCount;
     try {
-      const next = state.phoneOnly
-        ? await phoneStamp(state.hunt.id, index, done, who || state.me.id)
-        : await readJson<HuntState>(
-            await fetch("/api/hunt/stamps", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ index, done, memberId: who || state.me.id }),
-            }),
-          );
+      const next = await phoneStamp(state.hunt.id, index, done, who || state.me.id);
       applyState(next, "change");
       if (done && next.stampCount < 25) {
         setCelebrate({
@@ -228,101 +170,56 @@ export function HuntScreen() {
 
   async function saveNote(index: number, note: string) {
     if (!state) return;
-    const next = state.phoneOnly
-      ? await phoneNote(state.hunt.id, index, note)
-      : await readJson<HuntState>(
-          await fetch("/api/hunt/notes", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ index, note }),
-          }),
-        );
+    const next = await phoneNote(state.hunt.id, index, note);
     applyState(next, "change");
   }
 
   async function savePhoto(index: number, file: File | null) {
     if (!state) return;
-    if (state.phoneOnly) {
-      applyState(await phoneSavePhoto(state.hunt.id, index, file), "change");
-      return;
-    }
-    if (!file) {
-      applyState(await readJson<HuntState>(await fetch(`/api/hunt/photos?index=${index}`, { method: "DELETE" })), "change");
-      return;
-    }
-    const form = new FormData();
-    form.set("index", String(index));
-    form.set("photo", file);
-    applyState(await readJson<HuntState>(await fetch("/api/hunt/photos", { method: "POST", body: form })), "change");
+    applyState(await phoneSavePhoto(state.hunt.id, index, file), "change");
   }
 
   async function saveNames(familyName: string, advisorName: string) {
     if (!state) return;
-    const next = state.phoneOnly
-      ? await phoneUpdateNames(state.hunt.id, familyName, advisorName)
-      : await readJson<HuntState>(
-          await fetch("/api/hunt", {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ familyName, advisorName }),
-          }),
-        );
-    applyState(next, "change");
+    try {
+      applyState(await phoneUpdateNames(state.hunt.id, familyName, advisorName), "change");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "The names did not save.");
+    }
   }
 
   async function addMember(nickname: string, avatar: string) {
     if (!state) return;
-    const next = state.phoneOnly
-      ? await phoneAddMember(state.hunt.id, nickname, avatar)
-      : await readJson<HuntState>(
-          await fetch("/api/hunt/members", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ nickname, avatar }),
-          }),
-        );
-    applyState(next, "change");
-    const newest = next.members[next.members.length - 1];
-    if (newest) chooseWho(newest.id);
+    try {
+      const next = await phoneAddMember(state.hunt.id, nickname, avatar);
+      applyState(next, "change");
+      const newest = next.members[next.members.length - 1];
+      if (newest) chooseWho(newest.id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "That person did not save.");
+    }
   }
 
   async function reset(familyName: string) {
     if (!state) return;
-    const next = state.phoneOnly
-      ? await phoneReset(state.hunt.id, familyName)
-      : await readJson<HuntState>(
-          await fetch("/api/hunt/reset", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ familyName }),
-          }),
-        );
-    applyState(next, "change");
-    setLive("Stamps erased.");
+    try {
+      applyState(await phoneReset(state.hunt.id, familyName), "change");
+      setLive("Stamps erased from this browser.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "The stamps were not erased.");
+    }
   }
 
   async function removeHunt(familyName: string) {
     if (!state) return;
-    if (state.phoneOnly) await phoneDelete(state.hunt.id, familyName);
-    else {
-      await readJson(
-        await fetch("/api/hunt/delete", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ familyName }),
-        }),
-      );
-    }
+    await phoneDelete(state.hunt.id, familyName);
     writeActive(null);
-    window.location.href = "/";
+    router.push("/");
   }
 
   async function leave() {
-    if (state && !state.phoneOnly) {
-      await fetch("/api/hunt/leave", { method: "POST" });
-    }
     writeActive(null);
-    window.location.href = "/";
+    router.push("/");
   }
 
   if (loading) {
@@ -337,7 +234,7 @@ export function HuntScreen() {
     return (
       <Frame>
         <h1 className="text-4xl font-bold">No hunt on this phone yet</h1>
-        <p className="mt-3 text-xl">{loadError || "Start a hunt or join with a family code."}</p>
+        <p className="mt-3 text-xl">{loadError || "Start a hunt on this phone. Another phone does not have this hunt."}</p>
         <Button asChild className="mt-4">
           <Link href="/">Go to the start</Link>
         </Button>
@@ -352,11 +249,9 @@ export function HuntScreen() {
       <p className="sr-only" aria-live="polite">
         {live}
       </p>
-      {state.phoneOnly ? (
-        <p className="mb-3 rounded-2xl border-2 border-gold bg-gold-soft p-4 text-lg font-bold" role="status">
-          On this phone only. Another phone cannot see this hunt.
-        </p>
-      ) : null}
+      <p className="mb-3 rounded-3xl border-4 border-ink bg-lilac p-4 text-xl font-bold leading-snug" role="status">
+        Progress and photos stay in this browser on this device. Clearing browser data can erase them. Another phone does not share this progress. Pass this phone around your family.
+      </p>
       <p id="sync-note" className="text-lg font-bold" role="status">
         {sync}
       </p>
@@ -375,7 +270,11 @@ export function HuntScreen() {
       </div>
       <p className="mt-3 rounded-3xl bg-butter p-3 text-xl font-bold">Find all 25 for a big celebration.</p>
       <p className="mt-3 text-lg">
-        Who has the phone? <span className="font-bold">{holder.emoji} {holder.nickname}</span>
+        Who has the phone?{" "}
+        <span className="inline-flex items-center gap-2 font-bold">
+          <AvatarMark id={holder.avatar} className="h-8 w-8" />
+          {holder.nickname}
+        </span>
       </p>
       {error ? (
         <p role="alert" className="mt-3 text-xl font-bold text-coral">
@@ -415,11 +314,11 @@ export function HuntScreen() {
             onNote={saveNote}
             onPhoto={savePhoto}
             photoSrc={photoSrc(detail)}
-            offline={offline}
+            offline={false}
             busy={busy}
           />
         ) : view === "list" ? (
-          <ListView state={state} onOpen={(index) => { setSelected(index); setDetail(index); }} onStamp={(index, done) => void stamp(index, done)} offline={offline} busy={busy} />
+          <ListView state={state} onOpen={(index) => { setSelected(index); setDetail(index); }} onStamp={(index, done) => void stamp(index, done)} offline={false} busy={busy} />
         ) : view === "passport" ? (
           <PassportView
             state={state}
@@ -433,7 +332,7 @@ export function HuntScreen() {
             onDelete={removeHunt}
             onLeave={leave}
             onReplay={() => setFullOpen(true)}
-            offline={offline}
+            offline={false}
             busy={busy}
           />
         ) : (
@@ -443,7 +342,7 @@ export function HuntScreen() {
             onSelect={setSelected}
             onOpen={(index) => setDetail(index)}
             onStamp={(index, done) => void stamp(index, done)}
-            offline={offline}
+            offline={false}
             busy={busy}
           />
         )}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { AvatarMark } from "@/components/avatar-mark";
 import { CollectibleStamp } from "@/components/art";
 import { CHALLENGES } from "@/lib/challenges";
 import { namesMatch, formatWhen } from "@/lib/utils";
@@ -47,7 +48,6 @@ export function PassportView({
   const [eraseName, setEraseName] = useState("");
   const [deleteName, setDeleteName] = useState("");
   const [message, setMessage] = useState("");
-  const [copied, setCopied] = useState("");
   const stamped = state.challenges.filter((challenge) => challenge.done);
 
   return (
@@ -55,7 +55,7 @@ export function PassportView({
       <h2 id="passport-heading" className="font-display text-4xl leading-tight">
         Adventure passport
       </h2>
-      <p className="text-xl leading-snug">This passport belongs to the whole family. Every stamp is a shared one. Names show who held the phone. They are not scores.</p>
+      <p className="text-xl leading-snug">This passport stays on this phone. Whoever holds the phone adds the stamp. Names show who held it. They are not scores.</p>
       <p className="text-lg font-bold">
         {stamped.length} of 25 stamps. {state.bingoLineCount} of 12 bingo lines.
       </p>
@@ -102,7 +102,7 @@ export function PassportView({
         <Link href="/certificate">Make a souvenir certificate</Link>
       </Button>
       <Button variant="secondary" onClick={() => setOpenSettings((open) => !open)}>
-        {openSettings ? "Hide family settings" : "Family code and settings"}
+        {openSettings ? "Hide family settings" : "Family settings"}
       </Button>
       {openSettings ? (
         <div className="grid gap-4 rounded-3xl border-2 border-ink p-4">
@@ -111,37 +111,14 @@ export function PassportView({
             {state.members.map((member) => (
               <label key={member.id} className={`flex min-h-16 items-center gap-3 rounded-2xl border-2 px-3 text-xl font-bold ${who === member.id ? "border-coral bg-coral-soft" : "border-ink bg-paper"}`}>
                 <input type="radio" name="who" value={member.id} checked={who === member.id} onChange={() => onWho(member.id)} className="size-6" />
-                <span aria-hidden="true">{member.emoji}</span>
+                <AvatarMark id={member.avatar} className="h-8 w-8 shrink-0" />
                 <span>
                   {member.nickname} · {member.avatarLabel}
                 </span>
               </label>
             ))}
           </fieldset>
-          {!state.phoneOnly ? (
-            <div>
-              <p className="text-xl font-bold">Family code</p>
-              <p className="mt-1 text-lg">Anyone with this code can join and can see notes and photos.</p>
-              <p data-testid="family-code" className="mt-2 text-3xl font-bold tracking-wide">
-                {state.hunt.code}
-              </p>
-              <Button
-                className="mt-3"
-                variant="secondary"
-                onClick={() => {
-                  navigator.clipboard.writeText(state.hunt.code).then(
-                    () => setCopied("Copied."),
-                    () => setCopied("Select the code and copy it yourself."),
-                  );
-                }}
-              >
-                Copy the code
-              </Button>
-              {copied ? <p role="status">{copied}</p> : null}
-            </div>
-          ) : (
-            <p className="text-xl font-bold">There is no family code. This hunt stays on this phone.</p>
-          )}
+          <p className="text-xl font-bold">This hunt stays in this browser. Pass the phone. There is no code that opens it on another phone.</p>
           <form
             className="grid gap-3"
             onSubmit={(event) => {
@@ -203,7 +180,7 @@ export function PassportView({
             }}
           >
             <h3 className="text-2xl font-bold">Delete this whole hunt?</h3>
-            <p className="text-lg">Other phones using this code will lose the hunt too.</p>
+            <p className="text-lg">This removes the hunt from this browser only. It cannot be undone.</p>
             <label htmlFor="delete-name" className="text-xl font-bold">
               Type the family name to confirm
             </label>
@@ -215,11 +192,11 @@ export function PassportView({
           <Button
             variant="quiet"
             onClick={() => {
-              const ok = window.confirm("Leave this hunt on this phone? The hunt stays saved. You can join again with the code.");
+              const ok = window.confirm("Close this hunt? It stays saved in this browser. You can open it again from the start page.");
               if (ok) void onLeave();
             }}
           >
-            Leave on this phone
+            Close this hunt
           </Button>
           {message ? (
             <p role="status" className="text-lg font-bold">

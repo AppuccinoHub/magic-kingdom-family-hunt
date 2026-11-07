@@ -3,11 +3,30 @@ import Script from "next/script";
 import { Shell } from "@/components/shell";
 import "./globals.css";
 
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://appuccinohub.github.io/magic-kingdom-family-hunt").replace(/\/$/, "");
+const description =
+  "A cooperative family bingo card and adventure passport for one phone. Big text. No timer. Not an official Disney app.";
+const imageAlt = "Magic Kingdom family bingo. A purple card with gold letters and original star stamps.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "Magic Kingdom family bingo",
-  description:
-    "A cooperative family bingo card and adventure passport for Magic Kingdom. Big text. No timer. Not an official Disney app.",
+  description,
   robots: { index: false, follow: false },
+  openGraph: {
+    title: "Magic Kingdom family bingo",
+    description,
+    url: siteUrl,
+    siteName: "Magic Kingdom family bingo",
+    type: "website",
+    images: [{ url: `${siteUrl}/og.png`, width: 1200, height: 630, alt: imageAlt }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Magic Kingdom family bingo",
+    description,
+    images: [{ url: `${siteUrl}/og.png`, width: 1200, height: 630, alt: imageAlt }],
+  },
 };
 
 export const viewport: Viewport = {

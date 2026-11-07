@@ -1,6 +1,7 @@
 import { avatarById } from "@/lib/avatars";
 import { completedLines } from "@/lib/bingo";
 import { CHALLENGES } from "@/lib/challenges";
+import { storageErrorMessage } from "@/lib/storage-error";
 import type { ChallengeProgress, HuntState, Member } from "@/lib/types";
 
 const DB_NAME = "mk-family-hunt";
@@ -30,7 +31,7 @@ export type PhoneRecord = {
 
 const ACTIVE_KEY = "mk-active";
 
-export type ActiveHunt = { mode: "server" } | { mode: "phone"; id: string };
+export type ActiveHunt = { mode: "phone"; id: string };
 
 function db(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -91,10 +92,22 @@ export function recordToState(record: PhoneRecord): HuntState {
 async function put(record: PhoneRecord): Promise<void> {
   const database = await db();
   await new Promise<void>((resolve, reject) => {
+    let settled = false;
+    const fail = (error: unknown) => {
+      if (settled) return;
+      settled = true;
+      reject(new Error(storageErrorMessage(error ?? new Error("This browser could not save the hunt."))));
+    };
     const tx = database.transaction(STORE, "readwrite");
-    tx.objectStore(STORE).put(record);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error ?? new Error("This phone could not save the hunt."));
+    const request = tx.objectStore(STORE).put(record);
+    request.onerror = () => fail(request.error);
+    tx.oncomplete = () => {
+      if (settled) return;
+      settled = true;
+      resolve();
+    };
+    tx.onerror = () => fail(tx.error);
+    tx.onabort = () => fail(tx.error);
   });
 }
 
@@ -258,7 +271,6 @@ export function readActive(): ActiveHunt | null {
     const raw = localStorage.getItem(ACTIVE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as ActiveHunt;
-    if (parsed?.mode === "server") return parsed;
     if (parsed?.mode === "phone" && typeof parsed.id === "string") return parsed;
     return null;
   } catch {
