@@ -1,3 +1,4 @@
+import { AvatarMark } from "@/components/avatar-mark";
 import { AVATARS } from "@/lib/avatars";
 
 export function PersonFields({
@@ -48,7 +49,7 @@ export function PersonFields({
                 onChange={() => onAvatar(item.id)}
                 className="size-6"
               />
-              <span aria-hidden="true">{item.emoji}</span>
+              <AvatarMark id={item.id} className="h-9 w-9 shrink-0" />
               <span>{item.label}</span>
             </label>
           ))}

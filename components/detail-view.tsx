@@ -54,9 +54,13 @@ export function DetailView({
 
   async function saveNote() {
     setNoteMessage("");
-    await onNote(index, note);
-    dirty.current = false;
-    setNoteMessage("Note saved.");
+    try {
+      await onNote(index, note);
+      dirty.current = false;
+      setNoteMessage("Note saved in this browser.");
+    } catch (error) {
+      setNoteMessage(error instanceof Error ? error.message : "That note did not save.");
+    }
   }
 
   async function onFile(file: File | null) {
@@ -66,7 +70,7 @@ export function DetailView({
       const blob = await shrinkPhoto(file);
       const shrunk = new File([blob], "memory.jpg", { type: blob.type || "image/jpeg" });
       await onPhoto(index, shrunk);
-      setPhotoMessage("Photo saved.");
+      setPhotoMessage("Photo saved in this browser. It is not in your camera roll.");
     } catch (error) {
       setPhotoMessage(error instanceof Error ? error.message : "That photo did not save.");
     }
@@ -134,8 +138,7 @@ export function DetailView({
           Note
         </h3>
         <p id="note-hint" className="text-lg">
-          Optional. A memory for your passport. Anyone with the family code can read it.
-          {state.phoneOnly ? " On this phone, the note stays on this phone." : ""}
+          Optional. A memory for your passport. The note stays in this browser on this device. Clearing browser data can erase it.
         </p>
         <Textarea
           aria-label="Note for this challenge"
@@ -161,7 +164,7 @@ export function DetailView({
           Photo
         </h3>
         <p className="text-lg">
-          Optional. {state.phoneOnly ? "This photo stays on this phone." : "Anyone with your family code can see this photo."}
+          Optional. The picture stays in this browser on this device. It is not saved to your camera roll. Clearing this browser’s data can erase it.
         </p>
         {photoSrc ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -174,7 +177,7 @@ export function DetailView({
           <input data-testid="photo-input" className="sr-only" type="file" accept="image/*" onChange={(event) => void onFile(event.target.files?.[0] ?? null)} />
         </label>
         <label className="flex min-h-16 cursor-pointer items-center justify-center rounded-2xl border-2 border-ink bg-cream px-4 text-center text-xl font-bold">
-          Take a photo
+          Use the camera
           <input className="sr-only" type="file" accept="image/*" capture="environment" onChange={(event) => void onFile(event.target.files?.[0] ?? null)} />
         </label>
         {progress.hasPhoto ? (

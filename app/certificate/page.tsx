@@ -31,7 +31,7 @@ export default function CertificatePage() {
   }, []);
 
   useEffect(() => {
-    if (!state?.phoneOnly) return;
+    if (!state) return;
     let cancel = false;
     const created: string[] = [];
     (async () => {
@@ -75,8 +75,7 @@ export default function CertificatePage() {
         state={state}
         photoSrc={(index) => {
           if (!state.challenges[index]?.hasPhoto) return undefined;
-          if (state.phoneOnly) return urls[index];
-          return `/api/hunt/photos/${index}?v=${state.rev}`;
+          return urls[index];
         }}
       />
     </Frame>
