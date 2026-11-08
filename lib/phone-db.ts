@@ -1,6 +1,7 @@
 import { avatarById } from "@/lib/avatars";
 import { completedLines } from "@/lib/bingo";
 import { CHALLENGES } from "@/lib/challenges";
+import { hasStoredPhoto, photosForStore, storedPhotoToBlob, type StoredPhoto } from "@/lib/photo-bytes";
 import { storageErrorMessage } from "@/lib/storage-error";
 import type { ChallengeProgress, HuntState, Member } from "@/lib/types";
 
@@ -26,7 +27,7 @@ export type PhoneRecord = {
   meId: string;
   members: PhoneMember[];
   challenges: PhoneChallenge[];
-  photos: Record<string, Blob>;
+  photos: Record<string, StoredPhoto | Blob>;
 };
 
 const ACTIVE_KEY = "mk-active";
@@ -63,7 +64,7 @@ export function recordToState(record: PhoneRecord): HuntState {
       index,
       done: Boolean(row?.done),
       note: row?.note ?? "",
-      hasPhoto: Boolean(record.photos[String(index)]),
+      hasPhoto: hasStoredPhoto(record.photos?.[String(index)]),
       stampedByName: row?.stampedByName ?? null,
       stampedAt: row?.stampedAt ?? null,
     };
@@ -90,6 +91,7 @@ export function recordToState(record: PhoneRecord): HuntState {
 }
 
 async function put(record: PhoneRecord): Promise<void> {
+  record.photos = await photosForStore(record.photos);
   const database = await db();
   await new Promise<void>((resolve, reject) => {
     let settled = false;
@@ -187,7 +189,7 @@ export function phoneGet(id: string): Promise<HuntState | null> {
 }
 
 export function phonePhoto(id: string, index: number): Promise<Blob | null> {
-  return read(id).then((record) => record?.photos[String(index)] ?? null);
+  return read(id).then((record) => storedPhotoToBlob(record?.photos?.[String(index)]));
 }
 
 export function phoneStamp(id: string, index: number, done: boolean, memberId: string): Promise<HuntState> {
