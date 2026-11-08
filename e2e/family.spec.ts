@@ -69,12 +69,20 @@ test("one phone keeps the hunt, photos, and a single celebration", async ({ page
   await expect(page.getByRole("button", { name: "Start your hunt" })).toBeVisible();
   await page.screenshot({ path: "/opt/cursor/artifacts/welcome-day-mobile.png" });
   await page.getByRole("button", { name: "Night fireworks" }).click();
+  const night = page.locator("img[src*='banner-night']");
+  await expect(night).toBeVisible();
+  await night.evaluate(
+    (img) =>
+      img instanceof HTMLImageElement && img.complete && img.naturalWidth > 0
+        ? Promise.resolve()
+        : new Promise((resolve) => img.addEventListener("load", () => resolve(undefined), { once: true })),
+  );
   await page.screenshot({ path: "/opt/cursor/artifacts/welcome-night-mobile.png" });
   await page.getByRole("button", { name: "Day scene" }).click();
   await expect(page.getByText("👑")).toHaveCount(0);
   await expect(page.getByText("⭐")).toHaveCount(0);
   await page.screenshot({ path: "/opt/cursor/artifacts/welcome-mobile.png" });
-  for (const width of [320, 375, 390]) {
+  for (const width of [320, 375, 390, 430]) {
     await page.setViewportSize({ width, height: 844 });
     expect(await overflow(page), `welcome ${width}`).toBeLessThanOrEqual(1);
   }
@@ -83,7 +91,7 @@ test("one phone keeps the hunt, photos, and a single celebration", async ({ page
   await startHunt(page, "The Patel family");
   await page.locator("article").getByText("Take a pic with the castle", { exact: true }).scrollIntoViewIfNeeded();
   await page.screenshot({ path: "/opt/cursor/artifacts/board-mobile.png" });
-  for (const width of [320, 375, 390]) {
+  for (const width of [320, 375, 390, 430]) {
     await page.setViewportSize({ width, height: 844 });
     expect(await overflow(page), `board ${width}`).toBeLessThanOrEqual(1);
   }
