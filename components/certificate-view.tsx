@@ -7,7 +7,21 @@ import type { HuntState } from "@/lib/types";
 import { AdvisorLine, ParkNotice, UnofficialNotice } from "@/components/notices";
 import { Button } from "@/components/ui/button";
 
-export function CertificateView({ state, photoSrc }: { state: HuntState; photoSrc: (index: number) => string | undefined }) {
+export function CertificateView({
+  state,
+  photoSrc,
+  pdfReady,
+  prepareMessage,
+  saveMessage,
+  onSavePdf,
+}: {
+  state: HuntState;
+  photoSrc: (index: number) => string | undefined;
+  pdfReady: boolean;
+  prepareMessage: string;
+  saveMessage: string;
+  onSavePdf: () => void;
+}) {
   const stamped = state.challenges.filter((challenge) => challenge.done);
   const full = stamped.length === 25;
   return (
@@ -47,7 +61,20 @@ export function CertificateView({ state, photoSrc }: { state: HuntState; photoSr
       <p className="text-lg">Park times printed on the original card should be checked at the park. This certificate does not set a schedule.</p>
       <UnofficialNotice />
       <div className="no-print grid gap-3">
-        <Button onClick={() => window.print()}>Print or save as PDF</Button>
+        <p className="text-base leading-snug">This makes a PDF file you can save or print. Your stamps, notes, and photos stay in this browser.</p>
+        <Button data-testid="save-pdf" onClick={onSavePdf} disabled={!pdfReady}>
+          {pdfReady ? "Print or save as PDF" : "Preparing the PDF…"}
+        </Button>
+        {prepareMessage ? (
+          <p role="status" className="text-base font-bold leading-snug">
+            {prepareMessage}
+          </p>
+        ) : null}
+        {saveMessage ? (
+          <p role="status" className="text-base font-bold leading-snug">
+            {saveMessage}
+          </p>
+        ) : null}
         <Button asChild variant="secondary">
           <Link href="/hunt?view=passport">Back to the passport</Link>
         </Button>

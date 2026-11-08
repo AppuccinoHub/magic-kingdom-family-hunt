@@ -192,6 +192,20 @@ export function phonePhoto(id: string, index: number): Promise<Blob | null> {
   return read(id).then((record) => storedPhotoToBlob(record?.photos?.[String(index)]));
 }
 
+/** One read of every saved photo. Does not write, migrate, or remove anything. */
+export async function phonePhotoBlobs(id: string): Promise<Record<number, Blob>> {
+  const record = await read(id);
+  const blobs: Record<number, Blob> = {};
+  if (!record?.photos) return blobs;
+  for (const [key, value] of Object.entries(record.photos)) {
+    const index = Number(key);
+    if (!Number.isInteger(index)) continue;
+    const blob = storedPhotoToBlob(value);
+    if (blob) blobs[index] = blob;
+  }
+  return blobs;
+}
+
 export function phoneStamp(id: string, index: number, done: boolean, memberId: string): Promise<HuntState> {
   return update(id, (record) => {
     const challenge = record.challenges.find((item) => item.index === index);
