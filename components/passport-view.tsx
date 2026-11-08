@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { AvatarMark } from "@/components/avatar-mark";
-import { CollectibleStamp } from "@/components/art";
+import { InkStamp } from "@/components/ink-stamp";
 import { CHALLENGES } from "@/lib/challenges";
 import { namesMatch, formatWhen } from "@/lib/utils";
 import type { HuntState } from "@/lib/types";
@@ -69,7 +69,7 @@ export function PassportView({
             return (
               <li key={challenge.index} className="min-w-0 rounded-3xl border-4 border-ink bg-butter p-4">
                 <div className="flex min-w-0 items-start gap-3">
-                  <CollectibleStamp name={card.icon} found className="h-32 w-28 shrink-0" />
+                  <InkStamp icon={card.icon} label={card.iconWord} earned index={challenge.index} className="h-28 w-28 shrink-0" />
                   <div className="min-w-0">
                     <p className="text-lg font-bold">
                       Stamped{challenge.stampedByName ? ` by ${challenge.stampedByName}` : ""}
