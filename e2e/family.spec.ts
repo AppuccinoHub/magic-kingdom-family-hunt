@@ -2,6 +2,8 @@ import { writeFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
 
 const photoPath = "/tmp/mk-family-pixel.png";
+const photoPathTwo = "/tmp/mk-family-pixel-2.png";
+const notPhotoPath = "/tmp/mk-not-a-photo.txt";
 writeFileSync(
   photoPath,
   Buffer.from(
@@ -9,6 +11,36 @@ writeFileSync(
     "base64",
   ),
 );
+writeFileSync(
+  photoPathTwo,
+  Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEklEQVR42mP8z8AARAwMjDABAAieAQf3n0l0AAAAAElFTkSuQmCC",
+    "base64",
+  ),
+);
+writeFileSync(notPhotoPath, "this is not a photo");
+
+async function storedChallengePhoto(page: Page) {
+  return page.evaluate(async () => {
+    const active = JSON.parse(localStorage.getItem("mk-active") || "null") as { id: string };
+    const database = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open("mk-family-hunt", 1);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const record = await new Promise<{ photos?: Record<string, unknown> }>((resolve, reject) => {
+      const request = database.transaction("hunts", "readonly").objectStore("hunts").get(active.id);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const photo = record.photos?.["0"];
+    const bytes = photo && typeof photo === "object" && "bytes" in photo ? (photo as { bytes?: ArrayBuffer }).bytes : undefined;
+    return {
+      isBlob: photo instanceof Blob,
+      length: bytes instanceof ArrayBuffer ? bytes.byteLength : 0,
+    };
+  });
+}
 
 async function overflow(page: Page) {
   return page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -125,9 +157,23 @@ test("one phone keeps the hunt, photos, and a single celebration", async ({ page
   await page.getByLabel("Note for this challenge").fill("By the roses");
   await page.getByRole("button", { name: "Save note" }).click();
   await expect(page.getByText("Note saved in this browser.")).toBeVisible();
+  await page.getByTestId("photo-input").setInputFiles(notPhotoPath);
+  await expect(page.getByText("This photo type did not open. Try a JPEG or PNG.")).toBeVisible();
+  await expect(page.getByText("Photo saved in this browser.")).toHaveCount(0);
+  await expect(page.getByText("No photo yet.")).toBeVisible();
+  await page.screenshot({ path: "/opt/cursor/artifacts/photo-rejected-mobile.png" });
   await page.getByTestId("photo-input").setInputFiles(photoPath);
   await expect(page.getByText("It is not in your camera roll.")).toBeVisible();
   await expect(page.getByRole("img", { name: "Photo for challenge 1" })).toBeVisible();
+  const firstStored = await storedChallengePhoto(page);
+  expect(firstStored.isBlob).toBe(false);
+  expect(firstStored.length).toBeGreaterThan(0);
+  await page.locator("input[capture='environment']").setInputFiles(photoPathTwo);
+  await expect(page.getByText("It is not in your camera roll.")).toBeVisible();
+  const replaced = await storedChallengePhoto(page);
+  expect(replaced.isBlob).toBe(false);
+  expect(replaced.length).toBeGreaterThan(0);
+  expect(replaced.length).not.toBe(firstStored.length);
 
   await page.reload();
   await expect(page.getByTestId("stamp-count")).toHaveText("1");

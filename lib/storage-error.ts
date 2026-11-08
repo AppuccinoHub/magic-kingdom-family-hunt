@@ -4,6 +4,9 @@ export function storageErrorMessage(error: unknown): string {
   if (name === "QuotaExceededError" || name === "NS_ERROR_DOM_QUOTA_REACHED" || /quota/i.test(`${name} ${message}`)) {
     return "This browser is full. That change did not save. Remove a photo or free space in this browser, then try again. Stamps already saved are still here.";
   }
+  if (/preparing blob\/file/i.test(message) || /object store/i.test(message)) {
+    return "This phone could not keep that photo. It was not saved. Your stamps and notes are still here.";
+  }
   if (message) return message;
   return "This browser could not save that. Try again. Stamps already saved are still here.";
 }
