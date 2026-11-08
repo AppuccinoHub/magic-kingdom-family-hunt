@@ -52,7 +52,7 @@ export function PassportView({
 
   return (
     <section className="grid gap-4" aria-labelledby="passport-heading">
-      <h2 id="passport-heading" className="font-display text-4xl leading-tight">
+      <h2 id="passport-heading" className="text-xl font-bold leading-tight">
         Adventure passport
       </h2>
       <p className="text-xl leading-snug">This passport stays on this phone. Whoever holds the phone adds the stamp. Names show who held it. They are not scores.</p>

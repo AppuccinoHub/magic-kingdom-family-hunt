@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } 
 
 const STEPS = ["lg", "xl", "xxl"] as const;
 type Step = (typeof STEPS)[number];
-const LABELS: Record<Step, string> = { lg: "Large", xl: "Larger", xxl: "Largest" };
+const LABELS: Record<Step, string> = { lg: "Regular", xl: "Large", xxl: "Larger" };
 
 function currentStep(): Step {
   const value = document.documentElement.dataset.text;
@@ -50,7 +50,7 @@ export function ReadingControls() {
       </DialogTrigger>
       <DialogContent>
         <DialogTitle>Settings</DialogTitle>
-        <DialogDescription>Letters start large. Change them here if you want. Less motion keeps the fireworks still.</DialogDescription>
+        <DialogDescription>Letters start at a regular size. You can make them larger here. Less motion keeps the fireworks still.</DialogDescription>
         <div className="mt-4 grid gap-3" role="group" aria-labelledby="text-size-label">
           <p id="text-size-label" className="text-xl font-bold">
             Text size
