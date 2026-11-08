@@ -5,6 +5,7 @@ import { CHALLENGES } from "@/lib/challenges";
 import { cardTint } from "@/lib/card-style";
 import type { ChallengeProgress, HuntState } from "@/lib/types";
 import { challengeImage } from "@/lib/illustrations";
+import { InkStamp } from "@/components/ink-stamp";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { shrinkPhoto } from "@/lib/photos";
@@ -88,9 +89,18 @@ export function DetailView({
       <p className="text-lg font-bold">
         Challenge {index + 1} of 25. {card.iconWord}. {progress.done ? "Stamped." : "Not yet."}
       </p>
-      <div className={`flex min-w-0 items-center gap-3 rounded-3xl border-4 border-ink p-3 ${cardTint(index)}`}>
-        <img src={challengeImage(card.icon)} alt="" className="h-32 w-32 shrink-0 rounded-2xl object-cover" />
-        <p className="text-xl font-bold">{card.iconWord}</p>
+      <div className={`grid min-w-0 grid-cols-[6rem_minmax(0,1fr)] items-center gap-2 rounded-3xl border-4 border-ink p-3 ${cardTint(index)}`}>
+        <img src={challengeImage(card.icon)} alt="" className="h-32 w-full rounded-2xl object-cover" />
+        <div className="flex min-w-0 flex-col items-center gap-1">
+          <InkStamp
+            icon={card.icon}
+            label={card.iconWord}
+            earned={progress.done}
+            index={index}
+            className="h-28 w-28"
+          />
+          <p className="text-center text-base font-bold leading-tight">{card.iconWord}</p>
+        </div>
       </div>
       <p className="text-lg font-bold">Words on the card</p>
       <h2 className="break-words text-2xl font-bold leading-tight" data-testid="card-words">

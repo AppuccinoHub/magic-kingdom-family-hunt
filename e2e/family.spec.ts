@@ -109,6 +109,7 @@ test("one phone keeps the hunt, photos, and a single celebration", async ({ page
   await page.getByRole("button", { name: /Square 1\./ }).click();
   await expect(page.getByTestId("card-words")).toHaveText("Take a pic with the castle");
   await page.screenshot({ path: "/opt/cursor/artifacts/screen-challenge-1.png" });
+  await page.screenshot({ path: "/opt/cursor/artifacts/stamp-unearned-mobile.png" });
   await page.getByRole("button", { name: "Next" }).first().click();
   await expect(page.getByTestId("card-words")).toHaveText("See if Walt's light is on above the fire station");
   await page.screenshot({ path: "/opt/cursor/artifacts/screen-challenge-2.png" });
@@ -122,6 +123,8 @@ test("one phone keeps the hunt, photos, and a single celebration", async ({ page
   expect(await overflow(page)).toBeLessThanOrEqual(1);
   await page.getByRole("button", { name: "We did it. Add our stamp" }).click();
   await page.getByRole("button", { name: "Keep going" }).click();
+  await expect(page.getByRole("img", { name: "Passport stamp, Castle" })).toBeVisible();
+  await page.screenshot({ path: "/opt/cursor/artifacts/stamp-earned-mobile.png" });
   await page.getByLabel("Note for this challenge").fill("By the roses");
   await page.getByRole("button", { name: "Save note" }).click();
   await expect(page.getByText("Note saved in this browser.")).toBeVisible();
@@ -157,7 +160,13 @@ test("one phone keeps the hunt, photos, and a single celebration", async ({ page
   await page.reload();
   await expect(page.getByTestId("found-everything")).toHaveCount(0);
   await page.getByRole("button", { name: "Passport" }).click();
+  await expect(page.getByRole("img", { name: "Passport stamp, Castle" })).toBeVisible();
   await page.screenshot({ path: "/opt/cursor/artifacts/passport-mobile.png" });
+  await page.screenshot({ path: "/opt/cursor/artifacts/passport-stamps-mobile.png" });
+  const stamps = page.getByRole("img", { name: /^Passport stamp,/ });
+  await expect(stamps).toHaveCount(25);
+  await stamps.nth(2).scrollIntoViewIfNeeded();
+  await page.screenshot({ path: "/opt/cursor/artifacts/passport-stamps-variety-mobile.png" });
   await page.getByTestId("replay-celebration").click();
   await expect(page.getByRole("heading", { name: "You found everything!" })).toBeVisible();
 });
