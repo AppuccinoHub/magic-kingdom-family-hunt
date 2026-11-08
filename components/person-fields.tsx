@@ -25,7 +25,7 @@ export function PersonFields({
         </p>
         <input
           id="nickname"
-          className="min-h-16 w-full rounded-2xl border-2 border-ink bg-paper px-4 text-2xl"
+          className="min-h-12 w-full rounded-2xl border-2 border-ink bg-paper px-3 text-lg"
           value={nickname}
           onChange={(event) => onNickname(event.target.value)}
           maxLength={24}
@@ -39,7 +39,7 @@ export function PersonFields({
           {AVATARS.map((item) => (
             <label
               key={item.id}
-              className={`flex min-h-16 cursor-pointer items-center gap-2 rounded-2xl border-2 px-3 text-lg font-bold ${avatar === item.id ? "border-coral bg-coral-soft" : "border-ink bg-paper"}`}
+              className={`flex min-h-12 cursor-pointer items-center gap-2 rounded-2xl border-2 px-3 text-base font-bold ${avatar === item.id ? "border-coral bg-coral-soft" : "border-ink bg-paper"}`}
             >
               <input
                 type="radio"

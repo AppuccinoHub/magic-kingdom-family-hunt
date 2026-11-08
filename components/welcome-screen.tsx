@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { listPhoneHunts, phoneCreate, writeActive } from "@/lib/phone-db";
 import type { HuntState } from "@/lib/types";
 
-type Mode = "home" | "create" | "ready";
+type Mode = "home" | "how" | "saving" | "create" | "ready";
 
 export function WelcomeScreen() {
   const router = useRouter();
@@ -33,6 +33,11 @@ export function WelcomeScreen() {
       .catch(() => setPhoneHunts([]));
   }, []);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    document.getElementById("screen-title")?.focus();
+  }, [mode]);
+
   async function create() {
     setError("");
     setBusy(true);
@@ -51,7 +56,7 @@ export function WelcomeScreen() {
 
   return (
     <Frame>
-      <HeroBanner scene={scene} title="Our family adventure" subtitle="Magic Kingdom family bingo" />
+      <HeroBanner scene={scene} title="Our family adventure" subtitle="Magic Kingdom family bingo" titleId="screen-title" />
       <div className="mt-3 flex gap-2" role="group" aria-label="Picture">
         <button
           type="button"
@@ -71,29 +76,17 @@ export function WelcomeScreen() {
         </button>
       </div>
       {mode === "home" ? (
-        <div className="mt-4 grid gap-4">
+        <div className="mt-4 grid gap-3">
           <Button size="tall" onClick={() => setMode("create")}>
             Start your hunt
           </Button>
-          <p className="text-2xl leading-snug">Play together on one phone. Big letters. No timer. No sign-up.</p>
-          <p className="text-lg">For ages 7 to 87. Open Settings for larger letters or less motion.</p>
-          <DeviceNotice />
-          <section className="grid gap-3" aria-labelledby="how-heading">
-            <h2 id="how-heading" className="text-2xl font-bold">
-              How to play
-            </h2>
-            {[
-              "Start a hunt on this phone.",
-              "Pass this phone to the person playing.",
-              "Read a challenge in big letters.",
-              "Do it together at the park, then stamp it. Five in a line is a bingo.",
-            ].map((step, index) => (
-              <p key={step} className={`rounded-3xl p-4 text-xl font-bold leading-snug ${["bg-peach", "bg-butter", "bg-mint", "bg-sky"][index]}`}>
-                {index + 1}. {step}
-              </p>
-            ))}
-          </section>
-          <p className="rounded-3xl bg-lilac p-4 text-xl font-bold">One card on this phone. Whoever holds it can stamp. Find all 25 for a big celebration.</p>
+          <p className="text-xl leading-snug">Play together on one phone. Big letters. No timer. No sign-up.</p>
+          <Button variant="secondary" onClick={() => setMode("how")}>
+            How to play
+          </Button>
+          <Button variant="quiet" onClick={() => setMode("saving")}>
+            Where this is saved
+          </Button>
           {phoneHunts.map((hunt) => (
             <Button
               key={hunt.hunt.id}
@@ -106,9 +99,50 @@ export function WelcomeScreen() {
               Open {hunt.hunt.familyName}
             </Button>
           ))}
+        </div>
+      ) : null}
+
+      {mode === "how" ? (
+        <div className="mt-4 grid gap-3">
+          <h2 className="text-xl font-bold">How to play</h2>
+          {[
+            "Start a hunt on this phone.",
+            "Pass this phone to the person playing.",
+            "Read a challenge in big letters.",
+            "Do it together at the park, then stamp it. Five in a line is a bingo.",
+          ].map((step, index) => (
+            <p key={step} className={`rounded-3xl p-4 text-xl font-bold leading-snug ${["bg-peach", "bg-butter", "bg-mint", "bg-sky"][index]}`}>
+              {index + 1}. {step}
+            </p>
+          ))}
+          <p className="rounded-3xl bg-lilac p-4 text-xl font-bold">One card on this phone. Whoever holds it can stamp.</p>
+          <div className="grid grid-cols-2 gap-2">
+            <Button variant="quiet" onClick={() => setMode("home")}>
+              Back
+            </Button>
+            <Button variant="secondary" onClick={() => setMode("saving")}>
+              Next
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
+      {mode === "saving" ? (
+        <div className="mt-4 grid gap-3">
+          <h2 className="text-xl font-bold">Where this is saved</h2>
+          <DeviceNotice />
           <ParkNotice />
           <UnofficialNotice />
           <AdvisorLine name="" />
+          <p className="text-lg">For ages 7 to 87. Open Settings for larger letters or less motion.</p>
+          <div className="grid grid-cols-2 gap-2">
+            <Button variant="quiet" onClick={() => setMode("how")}>
+              Back
+            </Button>
+            <Button variant="secondary" onClick={() => setMode("create")}>
+              Next
+            </Button>
+          </div>
         </div>
       ) : null}
 
@@ -120,7 +154,7 @@ export function WelcomeScreen() {
             void create();
           }}
         >
-          <h2 className="text-3xl font-bold">New family hunt</h2>
+          <h2 className="text-xl font-bold">New family hunt</h2>
           <DeviceNotice />
           <div className="grid gap-2">
             <label htmlFor="family-name" className="text-xl font-bold">
@@ -171,7 +205,7 @@ export function WelcomeScreen() {
 
       {mode === "ready" && ready ? (
         <div className="mt-5 grid gap-4">
-          <h2 className="text-3xl font-bold">{ready.hunt.familyName} is ready</h2>
+          <h2 className="text-xl font-bold">{ready.hunt.familyName} is ready</h2>
           <p className="rounded-2xl border-2 border-gold bg-gold-soft p-4 text-xl font-bold" role="status">
             Saved in this browser. Pass this phone to play together. Another phone will not see these stamps or photos.
           </p>

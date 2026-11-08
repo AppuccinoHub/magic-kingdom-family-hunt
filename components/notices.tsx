@@ -1,8 +1,8 @@
 export function DeviceNotice() {
   return (
     <div className="rounded-3xl border-4 border-ink bg-lilac p-4" role="note" data-testid="device-notice">
-      <h2 className="text-3xl font-bold leading-tight">Saved in this browser</h2>
-      <p className="mt-2 text-2xl font-bold leading-snug">
+      <h2 className="text-xl font-bold leading-tight">Saved in this browser</h2>
+      <p className="mt-2 text-base font-bold leading-snug">
         Progress and photos stay in this browser on this device. Clearing this browser’s saved data can erase them. Another phone does not share this progress. Pass this phone around your family.
       </p>
     </div>

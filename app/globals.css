@@ -25,16 +25,16 @@
 }
 
 html {
-  font-size: 20px;
+  font-size: 16px;
   color-scheme: light;
 }
 
 html[data-text="xl"] {
-  font-size: 24px;
+  font-size: 18px;
 }
 
 html[data-text="xxl"] {
-  font-size: 28px;
+  font-size: 22px;
 }
 
 body {

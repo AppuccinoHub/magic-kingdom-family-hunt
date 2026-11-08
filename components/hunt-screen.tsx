@@ -6,8 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { BoardView } from "@/components/board-view";
 import { DetailView } from "@/components/detail-view";
 import { Frame } from "@/components/frame";
-import { ListView } from "@/components/list-view";
-import { AdvisorLine, ParkNotice, UnofficialNotice } from "@/components/notices";
+import { PageNav } from "@/components/page-nav";
+import { AdvisorLine } from "@/components/notices";
 import { PassportView } from "@/components/passport-view";
 import { Button } from "@/components/ui/button";
 import { AvatarMark } from "@/components/avatar-mark";
@@ -32,18 +32,16 @@ import {
 } from "@/lib/phone-db";
 import type { HuntState } from "@/lib/types";
 
-type View = "board" | "list" | "passport";
+type Screen = "progress" | "bingo" | "challenge" | "passport";
 
 type Celebrate = { stamps: number; lines: number; newLine: boolean; full: boolean };
 
 export function HuntScreen() {
   const router = useRouter();
   const params = useSearchParams();
-  const initialView = params.get("view") === "list" || params.get("view") === "passport" ? (params.get("view") as View) : "board";
   const [state, setState] = useState<HuntState | null>(null);
-  const [view, setView] = useState<View>(initialView);
-  const [detail, setDetail] = useState<number | null>(null);
-  const [selected, setSelected] = useState(0);
+  const [screen, setScreen] = useState<Screen>(params.get("view") === "passport" ? "passport" : "progress");
+  const [challengeIndex, setChallengeIndex] = useState(0);
   const [who, setWho] = useState("");
   const [loading, setLoading] = useState(true);
   const [missing, setMissing] = useState(false);
@@ -111,6 +109,16 @@ export function HuntScreen() {
     const saved = localStorage.getItem(whoKey(state.hunt.id));
     setWho(saved && state.members.some((member) => member.id === saved) ? saved : state.me.id);
   }, [state?.hunt.id, state?.me.id, state?.members]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    document.getElementById("screen-title")?.focus();
+  }, [screen, challengeIndex]);
+
+  function showChallenge(index: number) {
+    setChallengeIndex(Math.min(24, Math.max(0, index)));
+    setScreen("challenge");
+  }
 
   useEffect(() => {
     if (!state) return;
@@ -251,87 +259,101 @@ export function HuntScreen() {
       <p className="sr-only" aria-live="polite">
         {live}
       </p>
-      <HeroBanner scene="night" title={state.hunt.familyName} subtitle="Magic Kingdom family bingo" />
-      <p className="mt-3 rounded-3xl bg-[#fff6e4] px-4 py-3 text-xl font-extrabold leading-snug text-ink shadow-sm">
-        Pick a challenge. Try it together. Add a stamp!
-      </p>
-      <p id="sync-note" className="mt-3 text-lg font-bold" role="status">
-        {sync} Progress and photos stay in this browser.
-      </p>
-      <p className="mt-2 text-2xl font-extrabold">
-        <span data-testid="stamp-count">{state.stampCount}</span> of 25 complete
-      </p>
-      <div className="mt-2 flex items-center gap-2" aria-hidden="true">
-        <div className="h-4 flex-1 overflow-hidden rounded-full bg-[#efe4d4]">
-          <div className="h-full rounded-full bg-[#e23d4a]" style={{ width: `${(state.stampCount / 25) * 100}%` }} />
-        </div>
-        <img src={artSrc(ART.fireworks)} alt="" className="h-8 w-8 rounded-full object-cover" />
-      </div>
-      <p className="mt-1 text-lg font-bold">
-        Bingo lines: <span data-testid="bingo-count">{state.bingoLineCount}</span> of 12
-      </p>
-      <div className="mt-3 grid grid-cols-4 gap-2" aria-hidden="true">
-        {[ART.carousel, ART.fireworks, ART.rocket, ART.train].map((file) => (
-          <img key={file} src={artSrc(file)} alt="" className="aspect-square w-full rounded-full border-4 border-white object-cover shadow" />
-        ))}
-      </div>
-      <p className="mt-3 text-lg">
-        Who has the phone?{" "}
-        <span className="inline-flex items-center gap-2 font-bold">
-          <AvatarMark id={holder.avatar} className="h-8 w-8" />
-          {holder.nickname}
-        </span>
-      </p>
-      <AdvisorLine name={state.hunt.advisorName} />
-      {error ? (
-        <p role="alert" className="mt-3 text-xl font-bold text-coral">
-          {error}
-        </p>
-      ) : null}
-      {detail === null ? (
-        <div className="mt-4 grid grid-cols-3 gap-2" role="tablist" aria-label="Ways to see the hunt">
-          {(
-            [
-              ["board", "Bingo", "Bingo card"],
-              ["list", "Big list", "Big list"],
-              ["passport", "Passport", "Passport"],
-            ] as const
-          ).map(([id, label, name]) => (
-            <button
-              key={id}
-              type="button"
-              role="tab"
-              aria-label={name}
-              aria-selected={view === id}
-              className={`min-h-14 min-w-0 rounded-full px-1 text-base font-extrabold leading-tight shadow-sm ${view === id ? "bg-[#6d4aff] text-white" : "bg-white text-ink"}`}
-              onClick={() => setView(id)}
-            >
-              {label}
-            </button>
-          ))}
+      {screen === "progress" ? (
+        <div className="grid gap-3">
+          <HeroBanner scene="night" title={state.hunt.familyName} subtitle="Magic Kingdom family bingo" titleId="screen-title" />
+          <p id="sync-note" className="text-lg font-bold" role="status">
+            {sync} Progress and photos stay in this browser.
+          </p>
+          <p className="text-lg font-bold">
+            <span data-testid="stamp-count">{state.stampCount}</span> of 25 complete
+          </p>
+          <div className="flex items-center gap-2" aria-hidden="true">
+            <div className="h-4 flex-1 overflow-hidden rounded-full bg-[#efe4d4]">
+              <div className="h-full rounded-full bg-[#e23d4a]" style={{ width: `${(state.stampCount / 25) * 100}%` }} />
+            </div>
+            <img src={artSrc(ART.fireworks)} alt="" className="h-8 w-8 rounded-full object-cover" />
+          </div>
+          <p className="text-lg font-bold">
+            Bingo lines: <span data-testid="bingo-count">{state.bingoLineCount}</span> of 12
+          </p>
+          <p className="text-lg">
+            Who has the phone?{" "}
+            <span className="inline-flex items-center gap-2 font-bold">
+              <AvatarMark id={holder.avatar} className="h-8 w-8" />
+              {holder.nickname}
+            </span>
+          </p>
+          <AdvisorLine name={state.hunt.advisorName} />
+          <Button onClick={() => setScreen("bingo")}>Bingo card</Button>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              const next = state.challenges.findIndex((item) => !item.done);
+              showChallenge(next < 0 ? 0 : next);
+            }}
+          >
+            Open a challenge
+          </Button>
+          <Button variant="quiet" onClick={() => setScreen("passport")}>
+            Passport
+          </Button>
         </div>
       ) : null}
-      <div className="mt-4">
-        {detail !== null ? (
+      {screen === "bingo" ? (
+        <div className="grid gap-3">
+          <PageNav onBack={() => setScreen("progress")} onNext={() => showChallenge(0)} />
+          <BoardView state={state} onOpen={showChallenge} />
+        </div>
+      ) : null}
+      {screen === "challenge" ? (
+        <div className="grid gap-3">
+          <h1 id="screen-title" tabIndex={-1} className="text-xl font-bold leading-tight outline-none">
+            Challenge {challengeIndex + 1} of 25
+          </h1>
+          <PageNav
+            onBack={() => (challengeIndex === 0 ? setScreen("bingo") : showChallenge(challengeIndex - 1))}
+            onNext={() => showChallenge(challengeIndex + 1)}
+            nextDisabled={challengeIndex >= 24}
+          />
           <DetailView
             state={state}
-            index={detail}
-            onBack={() => setDetail(null)}
+            index={challengeIndex}
+            hideBack
+            onBack={() => setScreen("bingo")}
             onStamp={(index, done) => void stamp(index, done)}
             onNote={saveNote}
             onPhoto={savePhoto}
-            photoSrc={photoSrc(detail)}
+            photoSrc={photoSrc(challengeIndex)}
             offline={false}
             busy={busy}
           />
-        ) : view === "list" ? (
-          <ListView state={state} onOpen={(index) => { setSelected(index); setDetail(index); }} onStamp={(index, done) => void stamp(index, done)} offline={false} busy={busy} />
-        ) : view === "passport" ? (
+          <PageNav
+            onBack={() => (challengeIndex === 0 ? setScreen("bingo") : showChallenge(challengeIndex - 1))}
+            onNext={() => showChallenge(challengeIndex + 1)}
+            nextDisabled={challengeIndex >= 24}
+          />
+          <div className="grid grid-cols-2 gap-2">
+            <Button variant="quiet" onClick={() => setScreen("bingo")}>
+              Bingo card
+            </Button>
+            <Button variant="quiet" onClick={() => setScreen("passport")}>
+              Passport
+            </Button>
+          </div>
+        </div>
+      ) : null}
+      {screen === "passport" ? (
+        <div className="grid gap-3">
+          <PageNav onBack={() => setScreen("progress")} nextDisabled />
+          <h1 id="screen-title" tabIndex={-1} className="sr-only outline-none">
+            Passport
+          </h1>
           <PassportView
             state={state}
             who={who}
             onWho={chooseWho}
-            onOpen={(index) => { setSelected(index); setDetail(index); }}
+            onOpen={showChallenge}
             photoSrc={photoSrc}
             onSaveNames={saveNames}
             onAddMember={addMember}
@@ -342,22 +364,13 @@ export function HuntScreen() {
             offline={false}
             busy={busy}
           />
-        ) : (
-          <BoardView
-            state={state}
-            selected={selected}
-            onSelect={setSelected}
-            onOpen={(index) => setDetail(index)}
-            onStamp={(index, done) => void stamp(index, done)}
-            offline={false}
-            busy={busy}
-          />
-        )}
-      </div>
-      <div className="mt-6 grid gap-3">
-        <ParkNotice />
-        <UnofficialNotice />
-      </div>
+        </div>
+      ) : null}
+      {error ? (
+        <p role="alert" className="mt-3 text-xl font-bold text-coral">
+          {error}
+        </p>
+      ) : null}
       <Dialog open={celebrate !== null} onOpenChange={(open) => { if (!open) setCelebrate(null); }}>
         <DialogContent>
           <div className="seal seal-pop" aria-hidden="true">
@@ -380,8 +393,7 @@ export function HuntScreen() {
         onClose={() => setFullOpen(false)}
         onMemories={() => {
           setFullOpen(false);
-          setDetail(null);
-          setView("passport");
+          setScreen("passport");
         }}
       />
     </Frame>

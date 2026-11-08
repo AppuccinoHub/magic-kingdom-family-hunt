@@ -13,6 +13,7 @@ export function DetailView({
   state,
   index,
   onBack,
+  hideBack = false,
   onStamp,
   onNote,
   onPhoto,
@@ -23,6 +24,7 @@ export function DetailView({
   state: HuntState;
   index: number;
   onBack: () => void;
+  hideBack?: boolean;
   onStamp: (index: number, done: boolean) => void;
   onNote: (index: number, note: string) => Promise<void>;
   onPhoto: (index: number, file: File | null) => Promise<void>;
@@ -78,9 +80,11 @@ export function DetailView({
 
   return (
     <article className="grid gap-4">
-      <Button variant="secondary" onClick={onBack}>
-        Back
-      </Button>
+      {hideBack ? null : (
+        <Button variant="secondary" onClick={onBack}>
+          Back
+        </Button>
+      )}
       <p className="text-lg font-bold">
         Challenge {index + 1} of 25. {card.iconWord}. {progress.done ? "Stamped." : "Not yet."}
       </p>
@@ -89,15 +93,15 @@ export function DetailView({
         <p className="text-xl font-bold">{card.iconWord}</p>
       </div>
       <p className="text-lg font-bold">Words on the card</p>
-      <h2 className="break-words text-4xl font-bold leading-tight" data-testid="card-words">
+      <h2 className="break-words text-2xl font-bold leading-tight" data-testid="card-words">
         {card.text}
       </h2>
       <p className="text-lg">These are the card’s words. The spelling and punctuation are unchanged.</p>
       <section className="rounded-3xl border-2 border-ink bg-cream p-4" aria-labelledby="steps-heading">
-        <h3 id="steps-heading" className="text-2xl font-bold">
+        <h3 id="steps-heading" className="text-lg font-bold">
           How to do this
         </h3>
-        <ol className="mt-3 grid list-decimal gap-3 pl-6 text-2xl leading-snug">
+        <ol className="mt-2 grid list-decimal gap-2 pl-5 text-base leading-snug">
           {card.steps.map((step) => (
             <li key={step}>{step}</li>
           ))}
@@ -172,11 +176,11 @@ export function DetailView({
         ) : (
           <p className="text-lg">No photo yet.</p>
         )}
-        <label className="flex min-h-16 cursor-pointer items-center justify-center rounded-2xl border-2 border-ink bg-paper px-4 text-center text-xl font-bold">
+        <label className="flex min-h-12 cursor-pointer items-center justify-center rounded-2xl border-2 border-ink bg-paper px-3 text-center text-base font-bold">
           Add a photo
           <input data-testid="photo-input" className="sr-only" type="file" accept="image/*" onChange={(event) => void onFile(event.target.files?.[0] ?? null)} />
         </label>
-        <label className="flex min-h-16 cursor-pointer items-center justify-center rounded-2xl border-2 border-ink bg-cream px-4 text-center text-xl font-bold">
+        <label className="flex min-h-12 cursor-pointer items-center justify-center rounded-2xl border-2 border-ink bg-cream px-3 text-center text-base font-bold">
           Use the camera
           <input className="sr-only" type="file" accept="image/*" capture="environment" onChange={(event) => void onFile(event.target.files?.[0] ?? null)} />
         </label>
