@@ -150,4 +150,15 @@ html[data-motion="reduce"] *::after {
   body {
     background: white;
   }
+
+  .print-sheet li {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-sheet img {
+    max-width: 100% !important;
+    max-height: 3.6in !important;
+    object-fit: contain;
+  }
 }
