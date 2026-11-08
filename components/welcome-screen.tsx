@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { DayExplore, NightFireworks } from "@/components/art";
+import { HeroBanner } from "@/components/hero-banner";
 import { AdvisorLine, DeviceNotice, ParkNotice, UnofficialNotice } from "@/components/notices";
 import { PersonFields } from "@/components/person-fields";
 import { Frame } from "@/components/frame";
@@ -51,13 +51,7 @@ export function WelcomeScreen() {
 
   return (
     <Frame>
-      <div className={`overflow-hidden rounded-[2rem] ${scene === "day" ? "bg-[#e7f6ff]" : "bg-night"}`}>
-        {scene === "day" ? <DayExplore className="h-auto w-full" /> : <NightFireworks className="h-auto w-full" />}
-        <div className="px-4 pb-5">
-          <h1 className={`font-display text-5xl leading-none ${scene === "day" ? "text-ink" : "text-white"}`}>Our family adventure</h1>
-          <p className={`mt-2 text-2xl font-bold leading-snug ${scene === "day" ? "text-[#8C6418]" : "text-[#ffe08a]"}`}>Magic Kingdom family bingo</p>
-        </div>
-      </div>
+      <HeroBanner scene={scene} title="Our family adventure" subtitle="Magic Kingdom family bingo" />
       <div className="mt-3 flex gap-2" role="group" aria-label="Picture">
         <button
           type="button"

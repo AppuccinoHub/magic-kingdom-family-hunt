@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { CHALLENGES } from "@/lib/challenges";
 import { cardTint } from "@/lib/card-style";
 import type { ChallengeProgress, HuntState } from "@/lib/types";
-import { CollectibleStamp } from "@/components/art";
+import { challengeImage } from "@/lib/illustrations";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { shrinkPhoto } from "@/lib/photos";
@@ -85,7 +85,7 @@ export function DetailView({
         Challenge {index + 1} of 25. {card.iconWord}. {progress.done ? "Stamped." : "Not yet."}
       </p>
       <div className={`flex min-w-0 items-center gap-3 rounded-3xl border-4 border-ink p-3 ${cardTint(index)}`}>
-        <CollectibleStamp name={card.icon} found={progress.done} className="h-36 w-32 shrink-0" />
+        <img src={challengeImage(card.icon)} alt="" className="h-32 w-32 shrink-0 rounded-2xl object-cover" />
         <p className="text-xl font-bold">{card.iconWord}</p>
       </div>
       <p className="text-lg font-bold">Words on the card</p>

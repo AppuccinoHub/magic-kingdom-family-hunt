@@ -19,13 +19,13 @@ export const metadata: Metadata = {
     url: siteUrl,
     siteName: "Magic Kingdom family bingo",
     type: "website",
-    images: [{ url: `${siteUrl}/og.png`, width: 1200, height: 630, alt: imageAlt }],
+    images: [{ url: `${siteUrl}/og.jpg`, width: 1200, height: 630, alt: imageAlt }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Magic Kingdom family bingo",
     description,
-    images: [{ url: `${siteUrl}/og.png`, width: 1200, height: 630, alt: imageAlt }],
+    images: [{ url: `${siteUrl}/og.jpg`, width: 1200, height: 630, alt: imageAlt }],
   },
 };
 

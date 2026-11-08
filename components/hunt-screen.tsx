@@ -12,6 +12,8 @@ import { PassportView } from "@/components/passport-view";
 import { Button } from "@/components/ui/button";
 import { AvatarMark } from "@/components/avatar-mark";
 import { FoundEverything } from "@/components/found-everything";
+import { HeroBanner } from "@/components/hero-banner";
+import { ART, artSrc } from "@/lib/illustrations";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { completionToken, fullCardStorageKey, shouldShowFullCelebration } from "@/lib/celebration";
 import {
@@ -249,26 +251,30 @@ export function HuntScreen() {
       <p className="sr-only" aria-live="polite">
         {live}
       </p>
-      <p className="mb-3 rounded-3xl border-4 border-ink bg-lilac p-4 text-xl font-bold leading-snug" role="status">
-        Progress and photos stay in this browser on this device. Clearing browser data can erase them. Another phone does not share this progress. Pass this phone around your family.
+      <HeroBanner scene="night" title={state.hunt.familyName} subtitle="Magic Kingdom family bingo" />
+      <p className="mt-3 rounded-3xl bg-[#fff6e4] px-4 py-3 text-xl font-extrabold leading-snug text-ink shadow-sm">
+        Pick a challenge. Try it together. Add a stamp!
       </p>
-      <p id="sync-note" className="text-lg font-bold" role="status">
-        {sync}
+      <p id="sync-note" className="mt-3 text-lg font-bold" role="status">
+        {sync} Progress and photos stay in this browser.
       </p>
-      <h1 className="mt-2 text-4xl font-bold leading-tight">{state.hunt.familyName}</h1>
-      <AdvisorLine name={state.hunt.advisorName} />
-      <p className="mt-2 text-2xl font-bold">
-        <span data-testid="stamp-count">{state.stampCount}</span> of 25 stamps
+      <p className="mt-2 text-2xl font-extrabold">
+        <span data-testid="stamp-count">{state.stampCount}</span> of 25 complete
       </p>
-      <p className="text-2xl font-bold">
+      <div className="mt-2 flex items-center gap-2" aria-hidden="true">
+        <div className="h-4 flex-1 overflow-hidden rounded-full bg-[#efe4d4]">
+          <div className="h-full rounded-full bg-[#e23d4a]" style={{ width: `${(state.stampCount / 25) * 100}%` }} />
+        </div>
+        <img src={artSrc(ART.fireworks)} alt="" className="h-8 w-8 rounded-full object-cover" />
+      </div>
+      <p className="mt-1 text-lg font-bold">
         Bingo lines: <span data-testid="bingo-count">{state.bingoLineCount}</span> of 12
       </p>
-      <div className="mt-2 flex flex-wrap gap-1" aria-hidden="true">
-        {state.challenges.map((challenge) => (
-          <span key={challenge.index} className={`inline-block size-4 rounded-full ${challenge.done ? "bg-coral" : "bg-line"}`} />
+      <div className="mt-3 grid grid-cols-4 gap-2" aria-hidden="true">
+        {[ART.carousel, ART.fireworks, ART.rocket, ART.train].map((file) => (
+          <img key={file} src={artSrc(file)} alt="" className="aspect-square w-full rounded-full border-4 border-white object-cover shadow" />
         ))}
       </div>
-      <p className="mt-3 rounded-3xl bg-butter p-3 text-xl font-bold">Find all 25 for a big celebration.</p>
       <p className="mt-3 text-lg">
         Who has the phone?{" "}
         <span className="inline-flex items-center gap-2 font-bold">
@@ -276,6 +282,7 @@ export function HuntScreen() {
           {holder.nickname}
         </span>
       </p>
+      <AdvisorLine name={state.hunt.advisorName} />
       {error ? (
         <p role="alert" className="mt-3 text-xl font-bold text-coral">
           {error}
@@ -296,7 +303,7 @@ export function HuntScreen() {
               role="tab"
               aria-label={name}
               aria-selected={view === id}
-              className={`min-h-16 min-w-0 rounded-2xl border-2 px-1 text-base font-bold leading-tight ${view === id ? "border-[#8f241c] bg-coral text-white" : "border-ink bg-paper text-ink"}`}
+              className={`min-h-14 min-w-0 rounded-full px-1 text-base font-extrabold leading-tight shadow-sm ${view === id ? "bg-[#6d4aff] text-white" : "bg-white text-ink"}`}
               onClick={() => setView(id)}
             >
               {label}

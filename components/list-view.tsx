@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { CHALLENGES } from "@/lib/challenges";
-import { cardTint } from "@/lib/card-style";
+import { challengeImage } from "@/lib/illustrations";
 import type { HuntState } from "@/lib/types";
-import { CollectibleStamp } from "@/components/art";
 import { Button } from "@/components/ui/button";
 
 export function ListView({
@@ -32,16 +31,16 @@ export function ListView({
         {state.challenges.map((challenge) => {
           const card = CHALLENGES[challenge.index];
           return (
-            <li key={challenge.index} className={`min-w-0 rounded-3xl border-4 border-ink p-4 ${cardTint(challenge.index)}`}>
-              <div className="flex min-w-0 items-start gap-3">
-                <CollectibleStamp name={card.icon} found={challenge.done} className="h-28 w-24 shrink-0" />
+            <li key={challenge.index} className="min-w-0 rounded-[1.5rem] bg-white p-3 shadow-md">
+              <article className="flex min-w-0 items-start gap-3">
+                <img src={challengeImage(card.icon)} alt="" className="h-28 w-28 shrink-0 rounded-2xl object-cover" />
                 <div className="min-w-0">
-                  <p className="text-lg font-bold">
+                  <p className="text-base font-bold text-[#6b5b4b]">
                     {challenge.index + 1}. {card.iconWord}. {challenge.done ? "Stamped" : "Not yet"}
                   </p>
-                  <h3 className="mt-1 break-words text-2xl font-bold leading-tight">{card.text}</h3>
+                  <h3 className="mt-1 break-words text-2xl font-extrabold leading-tight text-ink">{card.text}</h3>
                 </div>
-              </div>
+              </article>
               <div className="mt-4 grid gap-3">
                 <Button onClick={() => onOpen(challenge.index)}>Read the steps</Button>
                 {challenge.done ? (

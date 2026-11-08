@@ -2,7 +2,7 @@ import { CHALLENGES } from "@/lib/challenges";
 import { lineIndexes } from "@/lib/bingo";
 import { cardTint } from "@/lib/card-style";
 import type { HuntState } from "@/lib/types";
-import { CollectibleStamp } from "@/components/art";
+import { challengeImage } from "@/lib/illustrations";
 import { Button } from "@/components/ui/button";
 
 export function BoardView({
@@ -38,16 +38,15 @@ export function BoardView({
           The words for the selected square are big. Five in a line makes a bingo. Lines can go across, down, or corner to corner.
         </p>
       </div>
-      <article className={`rounded-3xl border-4 border-ink p-4 ${cardTint(selected)}`}>
+      <article className="rounded-[1.5rem] bg-white p-3 shadow-md">
         <p className="text-lg font-bold">
           Square {selected + 1} of 25. Row {row}. {current.done ? "Stamped." : "Not yet."}
           {lines.has(selected) ? " In a bingo line." : ""}
         </p>
         <div className="mt-3 flex min-w-0 items-center gap-3">
-          <CollectibleStamp name={card.icon} found={current.done} className="h-32 w-28 shrink-0" />
-          <p className="text-xl font-bold">{card.iconWord}</p>
+          <img src={challengeImage(card.icon)} alt="" className="h-28 w-28 shrink-0 rounded-2xl object-cover" />
+          <p className="break-words text-3xl font-extrabold leading-tight">{card.text}</p>
         </div>
-        <p className="mt-3 break-words text-4xl font-bold leading-tight">{card.text}</p>
         <div className="mt-4 grid gap-3">
           <Button size="tall" onClick={() => onOpen(selected)}>
             Read the steps
@@ -72,7 +71,7 @@ export function BoardView({
         </Button>
       </div>
       <p className="text-lg font-bold">All 25 squares</p>
-      <div role="group" aria-label="Bingo card, 5 by 5" className="grid grid-cols-5 gap-1.5">
+      <div role="group" aria-label="Bingo card, 5 by 5" className="grid min-w-0 grid-cols-5 gap-1">
         {state.challenges.map((challenge) => {
           const text = CHALLENGES[challenge.index].text;
           const inLine = lines.has(challenge.index);
@@ -83,9 +82,9 @@ export function BoardView({
               type="button"
               aria-pressed={selected === challenge.index}
               onClick={() => onSelect(challenge.index)}
-              className={`bingo-cell flex min-h-16 flex-col items-center justify-center rounded-xl border-2 px-0.5 py-1 text-center font-bold leading-none ${selected === challenge.index ? "border-night bg-butter" : "border-ink bg-paper"} ${cardTint(challenge.index)}`}
+              className={`bingo-cell flex min-h-14 min-w-0 flex-col items-center justify-center overflow-hidden rounded-xl border-2 px-0.5 py-1 text-center font-bold leading-none ${selected === challenge.index ? "border-night bg-butter" : "border-ink bg-paper"} ${cardTint(challenge.index)}`}
             >
-              <CollectibleStamp name={CHALLENGES[challenge.index].icon} compact className="h-7 w-7" />
+              <img src={challengeImage(CHALLENGES[challenge.index].icon)} alt="" className="h-8 w-8 rounded-full object-cover" />
               <span aria-hidden="true" className="bingo-status">
                 {status}
               </span>

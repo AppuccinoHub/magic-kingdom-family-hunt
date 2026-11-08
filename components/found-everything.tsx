@@ -1,7 +1,7 @@
 "use client";
 
-import { CollectibleStamp, FireworkSky } from "@/components/art";
 import { ConfettiBurst } from "@/components/confetti";
+import { ART, artSrc } from "@/lib/illustrations";
 import { useReducedMotion } from "@/components/use-reduced-motion";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -20,12 +20,12 @@ export function FoundEverything({
   return (
     <Dialog open={open} onOpenChange={(next) => { if (!next) onClose(); }}>
       <DialogContent className="relative overflow-hidden" data-testid="found-everything">
-        <ConfettiBurst play={open} />
-        <FireworkSky motion={!reduce} className="h-auto w-full" />
+        <ConfettiBurst play={open && !reduce} />
+        <img src={artSrc(ART.bannerNight)} alt="" className="h-auto w-full rounded-2xl" />
         <div className="mt-3 flex flex-wrap justify-center gap-2" data-testid="static-stars" aria-hidden="true">
-          <CollectibleStamp name="elephant" found className="h-28 w-24" />
-          <CollectibleStamp name="cart" found className="h-28 w-24" />
-          <CollectibleStamp name="cup" found className="h-28 w-24" />
+          <img src={artSrc(ART.carousel)} alt="" className="h-20 w-20 rounded-full object-cover" />
+          <img src={artSrc(ART.train)} alt="" className="h-20 w-20 rounded-full object-cover" />
+          <img src={artSrc(ART.rocket)} alt="" className="h-20 w-20 rounded-full object-cover" />
         </div>
         <DialogTitle className="mt-3 break-words text-center">You found everything!</DialogTitle>
         <DialogDescription className="text-center text-2xl">
